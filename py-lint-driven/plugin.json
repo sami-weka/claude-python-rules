@@ -1,0 +1,28 @@
+{
+  "name": "py-lint-driven",
+  "version": "1.0.0",
+  "description": "Linter-driven and test-driven development for Python. Enforces ruff, complexipy, radon, and pytest automatically.",
+  "skills": [
+    "skills/run-ruff/SKILL.md",
+    "skills/run-complexipy/SKILL.md",
+    "skills/run-radon/SKILL.md",
+    "skills/run-pytest/SKILL.md",
+    "skills/write-tests/SKILL.md",
+    "skills/iterate-until-clean/SKILL.md",
+    "skills/report-quality/SKILL.md"
+  ],
+  "commands": [
+    "commands/tdd.md",
+    "commands/tdd-test.md",
+    "commands/lint-fix.md",
+    "commands/lint-check.md",
+    "commands/quality-report.md"
+  ],
+  "agents": [
+    "agents/lint-iterator.md"
+  ],
+  "hooks": [
+    "hooks/post-write-quality.json",
+    "hooks/post-edit-quality.json"
+  ]
+}
