@@ -22,6 +22,8 @@ Read-only audit — no files are modified.
    them from `py-lint-driven/templates/` now.
    If `py-lint-driven.local.md` does not exist in the project root, copy the
    template from `py-lint-driven/templates/py-lint-driven.local.md`.
+   If `.github/workflows/python-quality.yml` does not exist, copy it from
+   `py-lint-driven/templates/.github/workflows/python-quality.yml`.
 
 3. **Report**
    Use the `report-quality` skill to display results.

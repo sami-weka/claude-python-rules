@@ -1,0 +1,25 @@
+name: Python Quality
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install tools
+        run: pip install ruff complexipy radon pytest
+
+      - uses: arduino/setup-task@v2
+
+      - name: Run CI quality checks
+        run: task python:ci
