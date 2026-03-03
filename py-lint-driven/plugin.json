@@ -12,6 +12,7 @@
     "skills/report-quality/SKILL.md"
   ],
   "commands": [
+    "commands/setup.md",
     "commands/tdd.md",
     "commands/tdd-test.md",
     "commands/lint-fix.md",

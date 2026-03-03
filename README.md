@@ -15,19 +15,19 @@ Every time you write or edit a Python file, Claude runs quality checks and fixes
 
 ```bash
 pip install ruff complexipy radon pytest
-brew install go-task gh
+brew install go-task
 ```
 
-## Setup a new project
+## Setup
 
-From your project directory:
+Install the plugin from the Claude Code marketplace, then run in your project:
 
-```bash
-bash <(gh api repos/sami-weka/claude-python-rules/contents/setup.sh \
-  --jq '.content' | base64 -d)
+```
+/setup
 ```
 
-This creates:
+This creates all required files in your project:
+
 ```
 Taskfile.yaml
 taskfiles/Taskfile.python.yaml
@@ -40,6 +40,7 @@ conftest.py
 
 | Command | What it does |
 |---|---|
+| `/setup` | Bootstrap a new project with all tooling |
 | `/tdd <description>` | Write failing tests → implement → iterate until clean |
 | `/tdd-test <file>` | Generate tests for an existing file, confirm red state |
 | `/lint-fix [path]` | Fix all lint and test issues, iterate until clean |
@@ -66,10 +67,9 @@ task python:ci           # CI mode: checks changed .py files only
 
 ## CI
 
-The GitHub Actions workflow runs automatically on pull requests:
+The GitHub Actions workflow (created by `/setup`) runs automatically on pull requests:
 
 ```yaml
-# .github/workflows/python-quality.yml
 on:
   pull_request:
     branches: [main]
@@ -110,7 +110,7 @@ py-lint-driven/
   plugin.json
   skills/       run-ruff, run-complexipy, run-radon, run-pytest,
                 write-tests, iterate-until-clean, report-quality
-  commands/     tdd, tdd-test, lint-fix, lint-check, quality-report
+  commands/     setup, tdd, tdd-test, lint-fix, lint-check, quality-report
   agents/       lint-iterator
   hooks/        post-write-quality, post-edit-quality
   templates/    Taskfile.yaml, Taskfile.python.yaml,
