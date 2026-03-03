@@ -1,0 +1,24 @@
+{
+  "name": "py-lint-driven",
+  "owner": {
+    "name": "sami-weka"
+  },
+  "metadata": {
+    "description": "Linter-driven and test-driven development for Python",
+    "version": "1.0.0"
+  },
+  "plugins": [
+    {
+      "name": "py-lint-driven",
+      "source": ".",
+      "description": "Enforces ruff, complexipy, radon, and pytest automatically on every Python file write/edit.",
+      "version": "1.0.0",
+      "author": {
+        "name": "sami-weka"
+      },
+      "repository": "https://github.com/sami-weka/claude-python-rules",
+      "keywords": ["python", "linting", "tdd", "ruff", "pytest"],
+      "category": "code-quality"
+    }
+  ]
+}
