@@ -7,6 +7,10 @@ on:
 jobs:
   quality:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+
     steps:
       - uses: actions/checkout@v4
         with:
@@ -21,5 +25,49 @@ jobs:
 
       - uses: arduino/setup-task@v2
 
-      - name: Run CI quality checks
-        run: task python:ci
+      - name: Install reviewdog
+        uses: reviewdog/action-setup@v1
+
+      - name: Get changed Python files
+        id: changed
+        run: |
+          FILES=$(git diff --name-only --diff-filter=ACMRT origin/${{ github.base_ref }}...HEAD -- '*.py' | tr '\n' ' ')
+          echo "files=$FILES" >> $GITHUB_OUTPUT
+
+      - name: Ruff (inline review comments)
+        if: steps.changed.outputs.files != ''
+        env:
+          REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          ruff check --output-format=rdjson ${{ steps.changed.outputs.files }} | \
+            reviewdog -f=rdjson -reporter=github-pr-review -fail-on-error
+        continue-on-error: true
+
+      - name: complexipy (inline annotations)
+        if: steps.changed.outputs.files != ''
+        run: |
+          complexipy -mx 15 ${{ steps.changed.outputs.files }} > /tmp/cx.txt || true
+          python3 - << 'EOF'
+          import sys
+
+          current_file = None
+          with open("/tmp/cx.txt") as f:
+              for line in f:
+                  line = line.rstrip()
+                  stripped = line.strip()
+                  if stripped.endswith(".py") and not line.startswith("    "):
+                      current_file = stripped
+                  elif stripped.endswith("FAILED") and current_file:
+                      parts = stripped.split()
+                      func_name, score = parts[0], parts[1]
+                      print(f"::warning file={current_file}::Function '{func_name}' has cognitive complexity {score} (threshold: 15)")
+          EOF
+
+      - name: Run tests
+        run: pytest tests/ -v
+
+      - name: radon maintainability
+        if: steps.changed.outputs.files != ''
+        run: |
+          radon cc -n C ${{ steps.changed.outputs.files }} || true
+          radon mi ${{ steps.changed.outputs.files }} || true
