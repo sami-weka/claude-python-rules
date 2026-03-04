@@ -1,4 +1,5 @@
 {
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "py-lint-driven",
   "owner": {
     "name": "sami-weka"
@@ -10,7 +11,7 @@
   "plugins": [
     {
       "name": "py-lint-driven",
-      "source": ".",
+      "source": "./",
       "description": "Enforces ruff, complexipy, radon, and pytest automatically on every Python file write/edit.",
       "version": "1.0.0",
       "author": {
