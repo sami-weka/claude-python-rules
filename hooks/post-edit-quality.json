@@ -1,7 +1,0 @@
-{
-  "name": "post-edit-quality",
-  "event": "PostToolUse",
-  "tool": "Edit",
-  "description": "After editing a .py file, run quality checks. Identical logic to post-write-quality but scoped to the edited file.",
-  "prompt": "A Python file was just edited: {{tool.input.file_path}}\n\nRead py-lint-driven.local.md for config. If hooks_enabled is false, stop immediately.\n\nDetermine file type:\n- If the path contains '/tests/' or starts with 'tests/': this is a TEST FILE\n- Otherwise: this is a SOURCE FILE\n\nFor TEST FILES:\n1. Run: task python:test:file FILE={{tool.input.file_path}}\n2. Run: task python:ruff FILES={{tool.input.file_path}}\n3. Fix any ruff violations.\n\nFor SOURCE FILES:\n1. Check config: hooks_run_complexity and tdd_enabled\n2. Select task from this table:\n   - hooks_run_complexity=false, tdd_enabled=true  → task python:tdd:fast\n   - hooks_run_complexity=true,  tdd_enabled=true  → task python:tdd\n   - hooks_run_complexity=false, tdd_enabled=false → task python:lint:fast\n   - hooks_run_complexity=true,  tdd_enabled=false → task python:lint\n3. Run the selected task on {{tool.input.file_path}}\n4. If clean → done\n5. If violations → lint-iterator agent → re-verify → report if limit hit"
-}
