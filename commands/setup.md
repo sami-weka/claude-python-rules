@@ -23,12 +23,13 @@ Bootstrap the current project with all py-lint-driven tooling.
    Run each of the following and report any that are missing:
    - `ruff --version`
    - `complexipy --version`
+   - `xenon --version`
    - `pytest --version`
    - `task --version`
 
    If any are missing, show install instructions and stop:
    ```
-   pip install ruff complexipy pytest
+   pip install ruff complexipy xenon pytest
    brew install go-task
    ```
 

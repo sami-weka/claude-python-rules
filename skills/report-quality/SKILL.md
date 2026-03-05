@@ -1,6 +1,6 @@
 ---
 name: report-quality
-description: Aggregate ruff, complexipy, and pytest results into a single quality summary with a PASS/FAIL verdict. Use this skill at the end of any quality check cycle — after /tdd, /lint-fix, /lint-check, or /quality-report commands complete. Also use it when the user asks "what's the quality like", "show me a summary", or "how clean is the code". Pulls together all tool outputs that have already been run — does not re-run tools itself.
+description: Aggregate ruff, complexipy, xenon, and pytest results into a single quality summary with a PASS/FAIL verdict. Use this skill at the end of any quality check cycle — after /tdd, /lint-fix, /lint-check, or /quality-report commands complete. Also use it when the user asks "what's the quality like", "show me a summary", or "how clean is the code". Pulls together all tool outputs that have already been run — does not re-run tools itself.
 ---
 
 # report-quality Skill
@@ -24,6 +24,9 @@ it does not run tools. Run the relevant tasks first, then call this skill to sum
 Top offenders:
   - <function> in <file> — score <N>
 
+### Cyclomatic Complexity (xenon, max-absolute: <grade>, max-modules: <grade>, max-average: <grade>)
+<N> violations  |  or: clean ✓
+
 ### Verdict
 PASS ✓  |  FAIL ✗ — <N> issues remain
 ```
@@ -43,7 +46,7 @@ Extract score (middle token) from lines ending in `FAILED`.
 
 ## Verdict Rules
 
-- **PASS**: all tests green AND ruff clean AND complexipy clean
+- **PASS**: all tests green AND ruff clean AND complexipy clean AND xenon clean
 - **FAIL**: any tool reports a violation, or any test fails
 
 ## Saving Reports

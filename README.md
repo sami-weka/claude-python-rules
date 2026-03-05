@@ -8,12 +8,13 @@ Every time you write or edit a Python file, Claude runs quality checks and fixes
 
 - **ruff** — linting and formatting
 - **complexipy** — cognitive complexity per function (default threshold: 15)
+- **xenon** — cyclomatic complexity (default: max-absolute B, max-modules A, max-average A)
 - **pytest** — tests must pass
 
 ## Prerequisites
 
 ```bash
-pip install ruff complexipy pytest
+pip install ruff complexipy xenon pytest
 brew install go-task
 ```
 
@@ -55,12 +56,13 @@ All tools are invoked through Taskfile tasks. You can run them directly:
 task python:tdd          # tests + full lint
 task python:tdd:fast     # tests + ruff only (faster)
 task python:tdd:fix      # tests + ruff:fix + fmt
-task python:lint         # ruff + complexipy
+task python:lint         # ruff + complexipy + xenon
 task python:lint:fast    # ruff only
 task python:check        # lint + format check (read-only)
 task python:fix          # lint:fix + fmt
 task python:test         # pytest only
 task python:complexity   # complexipy only
+task python:cyclomatic   # xenon only
 task python:ci           # CI mode: checks changed .py files only
 ```
 
@@ -83,6 +85,9 @@ Edit `py-lint-driven.local.md` in your project root:
 ```yaml
 ---
 max_cognitive_complexity: 15
+xenon_max_absolute: B
+xenon_max_modules: A
+xenon_max_average: A
 iteration_limit: 5
 hooks_enabled: true
 hooks_run_complexity: false
@@ -93,9 +98,12 @@ tdd_enabled: true
 | Setting | Description |
 |---|---|
 | `max_cognitive_complexity` | complexipy threshold per function |
+| `xenon_max_absolute` | worst single function cyclomatic grade allowed (A–F) |
+| `xenon_max_modules` | worst module average grade allowed (A–F) |
+| `xenon_max_average` | project-wide average grade allowed (A–F) |
 | `iteration_limit` | max fix/verify cycles before giving up |
 | `hooks_enabled` | disable automatic checks on file write/edit |
-| `hooks_run_complexity` | include complexipy in hooks (slower) |
+| `hooks_run_complexity` | include complexipy+xenon in hooks (slower) |
 | `tdd_enabled` | include tests in hooks |
 
 ## Plugin structure

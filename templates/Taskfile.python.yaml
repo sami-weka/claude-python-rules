@@ -7,6 +7,9 @@ version: '3'
 
 vars:
   MAX_COGNITIVE_COMPLEXITY: "15"
+  XENON_MAX_ABSOLUTE: "B"
+  XENON_MAX_MODULES: "A"
+  XENON_MAX_AVERAGE: "A"
 
 tasks:
 
@@ -26,6 +29,11 @@ tasks:
     desc: "Run complexipy — exits non-zero if cognitive complexity exceeds MAX_COGNITIVE_COMPLEXITY"
     cmds:
       - complexipy -mx {{.MAX_COGNITIVE_COMPLEXITY}} {{.FILES | default "."}}
+
+  cyclomatic:
+    desc: "Run xenon — exits non-zero if cyclomatic complexity exceeds thresholds (always runs on .)"
+    cmds:
+      - xenon -b {{.XENON_MAX_ABSOLUTE}} -m {{.XENON_MAX_MODULES}} -a {{.XENON_MAX_AVERAGE}} .
 
   fmt:
     desc: "Run ruff format"
@@ -61,17 +69,19 @@ tasks:
       - echo "--> Ruff check passed"
 
   lint:
-    desc: "Full lint: ruff + complexity"
+    desc: "Full lint: ruff + complexity + cyclomatic"
     cmds:
       - task: ruff
       - task: complexity
+      - task: cyclomatic
       - echo "--> All Python linters passed"
 
   lint:fix:
-    desc: "Ruff auto-fix + complexity check (only ruff is auto-fixable)"
+    desc: "Ruff auto-fix + complexity + cyclomatic check (only ruff is auto-fixable)"
     cmds:
       - task: ruff:fix
       - task: complexity
+      - task: cyclomatic
       - echo "--> Ruff auto-fix applied, linters checked"
 
   check:
@@ -96,14 +106,14 @@ tasks:
       - echo "--> Tests passed and ruff clean"
 
   tdd:
-    desc: "Full TDD cycle: tests + ruff + complexity"
+    desc: "Full TDD cycle: tests + ruff + complexity + cyclomatic"
     cmds:
       - task: test
       - task: lint
       - echo "--> All tests passed and linting clean"
 
   tdd:fix:
-    desc: "Full TDD fix cycle: tests + ruff:fix + complexity + fmt"
+    desc: "Full TDD fix cycle: tests + ruff:fix + complexity + cyclomatic + fmt"
     cmds:
       - task: test
       - task: lint:fix
@@ -122,5 +132,6 @@ tasks:
         vars: {FILES: "{{.CHANGED_PY_FILES}}"}
       - task: complexity
         vars: {FILES: "{{.CHANGED_PY_FILES}}"}
+      - task: cyclomatic
       - task: test
       - echo "--> CI checks passed"

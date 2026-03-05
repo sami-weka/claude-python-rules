@@ -21,7 +21,7 @@ jobs:
           python-version: "3.11"
 
       - name: Install tools
-        run: pip install ruff complexipy
+        run: pip install ruff complexipy xenon
 
       - name: Install reviewdog
         uses: reviewdog/action-setup@v1
@@ -71,7 +71,7 @@ jobs:
           python-version: "3.11"
 
       - name: Install tools
-        run: pip install ruff complexipy pytest
+        run: pip install ruff complexipy xenon pytest
 
       - uses: arduino/setup-task@v2
 
