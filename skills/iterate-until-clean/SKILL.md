@@ -1,6 +1,6 @@
 ---
 name: iterate-until-clean
-description: Core fix/verify loop that runs until tests pass and linting is clean, or the iteration limit is hit. Use this skill whenever you need to drive code from a failing/dirty state to fully green — after writing implementation, after a user asks to "fix all issues", or as part of /tdd and /lint-fix commands. Always runs full lint (ruff + complexipy + radon), never the fast variant. If you're fixing code and not sure when to stop, use this skill.
+description: Core fix/verify loop that runs until tests pass and linting is clean, or the iteration limit is hit. Use this skill whenever you need to drive code from a failing/dirty state to fully green — after writing implementation, after a user asks to "fix all issues", or as part of /tdd and /lint-fix commands. Always runs full lint (ruff + complexipy), never the fast variant. If you're fixing code and not sure when to stop, use this skill.
 ---
 
 # iterate-until-clean Skill
@@ -14,7 +14,7 @@ missing, use the default: `iteration_limit = 5`.
 
 ## Always Full Lint
 
-This skill always runs full lint (ruff + complexipy + radon). The fast/full distinction
+This skill always runs full lint (ruff + complexipy). The fast/full distinction
 (`hooks_run_complexity`) applies only to hooks — never to this skill.
 
 ## Loop Structure
@@ -23,17 +23,16 @@ For each iteration (starting at 1):
 
 ### Fix Pass
 Run `task python:tdd:fix`
-This runs: test → ruff:fix → complexity check → maintainability check → fmt
+This runs: test → ruff:fix → complexity check → fmt
 
 Handle each failure type:
 - **Test failures** → fix implementation logic in source files. Never modify test files.
 - **ruff violations after auto-fix** → fix manually. ruff:fix handles most cases; remaining ones need code changes.
 - **Complexity violations** → propose a specific refactor strategy, wait for user confirmation, then apply.
-- **Maintainability violations** → flag to the user and suggest simplification options.
 
 ### Verify Pass
 Run `task python:tdd`
-This runs: test → ruff → complexipy → radon (read-only, no fixes)
+This runs: test → ruff → complexipy (read-only, no fixes)
 
 If fully green → done. Report success and stop.
 If still dirty → increment counter, repeat.

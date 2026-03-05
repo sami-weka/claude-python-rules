@@ -7,14 +7,13 @@ version: '3'
 
 vars:
   MAX_COGNITIVE_COMPLEXITY: "15"
-  RADON_CC_MIN_GRADE: "C"
 
 tasks:
 
   # --- Leaf tasks: direct tool invocations ---
 
   ruff:
-    desc: "Run ruff check (config auto-discovered from pyproject.toml or ruff.toml)"
+    desc: "Run ruff check (config from pyproject.toml)"
     cmds:
       - ruff check {{.FILES | default "."}}
 
@@ -27,12 +26,6 @@ tasks:
     desc: "Run complexipy — exits non-zero if cognitive complexity exceeds MAX_COGNITIVE_COMPLEXITY"
     cmds:
       - complexipy -mx {{.MAX_COGNITIVE_COMPLEXITY}} {{.FILES | default "."}}
-
-  maintainability:
-    desc: "Run radon cc and mi — always exits 0, output parsed by run-radon skill"
-    cmds:
-      - radon cc -n {{.RADON_CC_MIN_GRADE}} {{.FILES | default "."}}
-      - radon mi {{.FILES | default "."}}
 
   fmt:
     desc: "Run ruff format"
@@ -68,19 +61,17 @@ tasks:
       - echo "--> Ruff check passed"
 
   lint:
-    desc: "Full lint: ruff + complexity + maintainability"
+    desc: "Full lint: ruff + complexity"
     cmds:
       - task: ruff
       - task: complexity
-      - task: maintainability
       - echo "--> All Python linters passed"
 
   lint:fix:
-    desc: "Ruff auto-fix + complexity check + maintainability check (only ruff is auto-fixable)"
+    desc: "Ruff auto-fix + complexity check (only ruff is auto-fixable)"
     cmds:
       - task: ruff:fix
       - task: complexity
-      - task: maintainability
       - echo "--> Ruff auto-fix applied, linters checked"
 
   check:
@@ -105,14 +96,14 @@ tasks:
       - echo "--> Tests passed and ruff clean"
 
   tdd:
-    desc: "Full TDD cycle: tests + ruff + complexity + maintainability"
+    desc: "Full TDD cycle: tests + ruff + complexity"
     cmds:
       - task: test
       - task: lint
       - echo "--> All tests passed and linting clean"
 
   tdd:fix:
-    desc: "Full TDD fix cycle: tests + ruff:fix + complexity + maintainability + fmt"
+    desc: "Full TDD fix cycle: tests + ruff:fix + complexity + fmt"
     cmds:
       - task: test
       - task: lint:fix
@@ -124,15 +115,12 @@ tasks:
     vars:
       CHANGED_PY_FILES:
         sh: "git fetch origin ${GITHUB_BASE_REF:-main} --quiet && git diff --name-only --diff-filter=ACMRT origin/${GITHUB_BASE_REF:-main}...HEAD -- '*.py' | tr '\n' ' '"
-    # status exits 0 when no changed files → Taskfile skips all cmds cleanly
     status:
       - '[ -z "{{.CHANGED_PY_FILES}}" ]'
     cmds:
       - task: ruff
         vars: {FILES: "{{.CHANGED_PY_FILES}}"}
       - task: complexity
-        vars: {FILES: "{{.CHANGED_PY_FILES}}"}
-      - task: maintainability
         vars: {FILES: "{{.CHANGED_PY_FILES}}"}
       - task: test
       - echo "--> CI checks passed"

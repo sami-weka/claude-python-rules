@@ -8,13 +8,12 @@ Every time you write or edit a Python file, Claude runs quality checks and fixes
 
 - **ruff** — linting and formatting
 - **complexipy** — cognitive complexity per function (default threshold: 15)
-- **radon** — cyclomatic complexity and maintainability index
 - **pytest** — tests must pass
 
 ## Prerequisites
 
 ```bash
-pip install ruff complexipy radon pytest
+pip install ruff complexipy pytest
 brew install go-task
 ```
 
@@ -32,6 +31,7 @@ This creates all required files in your project:
 Taskfile.yaml
 taskfiles/Taskfile.python.yaml
 py-lint-driven.local.md
+pyproject.toml
 .github/workflows/python-quality.yml
 conftest.py
 ```
@@ -55,13 +55,12 @@ All tools are invoked through Taskfile tasks. You can run them directly:
 task python:tdd          # tests + full lint
 task python:tdd:fast     # tests + ruff only (faster)
 task python:tdd:fix      # tests + ruff:fix + fmt
-task python:lint         # ruff + complexipy + radon
+task python:lint         # ruff + complexipy
 task python:lint:fast    # ruff only
 task python:check        # lint + format check (read-only)
 task python:fix          # lint:fix + fmt
 task python:test         # pytest only
 task python:complexity   # complexipy only
-task python:maintainability  # radon cc + mi
 task python:ci           # CI mode: checks changed .py files only
 ```
 
@@ -84,8 +83,6 @@ Edit `py-lint-driven.local.md` in your project root:
 ```yaml
 ---
 max_cognitive_complexity: 15
-radon_cc_min_grade: C
-radon_mi_floor: 20
 iteration_limit: 5
 hooks_enabled: true
 hooks_run_complexity: false
@@ -96,11 +93,9 @@ tdd_enabled: true
 | Setting | Description |
 |---|---|
 | `max_cognitive_complexity` | complexipy threshold per function |
-| `radon_cc_min_grade` | cyclomatic complexity grade cutoff (A–F) |
-| `radon_mi_floor` | maintainability index floor (0–100) |
 | `iteration_limit` | max fix/verify cycles before giving up |
 | `hooks_enabled` | disable automatic checks on file write/edit |
-| `hooks_run_complexity` | include complexipy+radon in hooks (slower) |
+| `hooks_run_complexity` | include complexipy in hooks (slower) |
 | `tdd_enabled` | include tests in hooks |
 
 ## Plugin structure
@@ -108,12 +103,12 @@ tdd_enabled: true
 ```
 py-lint-driven/
   plugin.json
-  skills/       run-ruff, run-complexipy, run-radon, run-pytest,
+  skills/       run-ruff, run-complexipy, run-pytest,
                 write-tests, iterate-until-clean, report-quality
   commands/     setup, tdd, tdd-test, lint-fix, lint-check, quality-report
   agents/       lint-iterator
-  hooks/        post-write-quality, post-edit-quality
+  hooks/        hooks.json
   templates/    Taskfile.yaml, Taskfile.python.yaml,
-                py-lint-driven.local.md,
+                py-lint-driven.local.md, pyproject.toml,
                 .github/workflows/python-quality.yml
 ```

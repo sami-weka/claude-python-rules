@@ -13,6 +13,7 @@ Bootstrap the current project with all py-lint-driven tooling.
 - `Taskfile.yaml` — root Taskfile with python namespace
 - `taskfiles/Taskfile.python.yaml` — all python tasks (lint, test, tdd, ci, etc.)
 - `py-lint-driven.local.md` — configuration file (edit to change thresholds)
+- `pyproject.toml` — ruff and pytest configuration
 - `.github/workflows/python-quality.yml` — CI workflow for pull requests
 - `conftest.py` — adds project root to sys.path so pytest can find modules
 
@@ -22,13 +23,12 @@ Bootstrap the current project with all py-lint-driven tooling.
    Run each of the following and report any that are missing:
    - `ruff --version`
    - `complexipy --version`
-   - `radon --version`
    - `pytest --version`
    - `task --version`
 
    If any are missing, show install instructions and stop:
    ```
-   pip install ruff complexipy radon pytest
+   pip install ruff complexipy pytest
    brew install go-task
    ```
 
@@ -41,6 +41,7 @@ Bootstrap the current project with all py-lint-driven tooling.
    - `${CLAUDE_PLUGIN_ROOT}/templates/Taskfile.yaml` → `Taskfile.yaml`
    - `${CLAUDE_PLUGIN_ROOT}/templates/Taskfile.python.yaml` → `taskfiles/Taskfile.python.yaml`
    - `${CLAUDE_PLUGIN_ROOT}/templates/py-lint-driven.local.md` → `py-lint-driven.local.md`
+   - `${CLAUDE_PLUGIN_ROOT}/templates/pyproject.toml` → `pyproject.toml`
    - `${CLAUDE_PLUGIN_ROOT}/templates/.github/workflows/python-quality.yml` → `.github/workflows/python-quality.yml`
 
 4. **Create conftest.py**
@@ -61,6 +62,7 @@ Bootstrap the current project with all py-lint-driven tooling.
      created  Taskfile.yaml
      created  taskfiles/Taskfile.python.yaml
      created  py-lint-driven.local.md
+     created  pyproject.toml
      created  .github/workflows/python-quality.yml
      created  conftest.py
 

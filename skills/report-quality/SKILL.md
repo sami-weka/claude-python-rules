@@ -1,6 +1,6 @@
 ---
 name: report-quality
-description: Aggregate ruff, complexipy, radon, and pytest results into a single quality summary with a PASS/FAIL verdict. Use this skill at the end of any quality check cycle — after /tdd, /lint-fix, /lint-check, or /quality-report commands complete. Also use it when the user asks "what's the quality like", "show me a summary", or "how clean is the code". Pulls together all tool outputs that have already been run — does not re-run tools itself.
+description: Aggregate ruff, complexipy, and pytest results into a single quality summary with a PASS/FAIL verdict. Use this skill at the end of any quality check cycle — after /tdd, /lint-fix, /lint-check, or /quality-report commands complete. Also use it when the user asks "what's the quality like", "show me a summary", or "how clean is the code". Pulls together all tool outputs that have already been run — does not re-run tools itself.
 ---
 
 # report-quality Skill
@@ -24,14 +24,6 @@ it does not run tools. Run the relevant tasks first, then call this skill to sum
 Top offenders:
   - <function> in <file> — score <N>
 
-### Cyclomatic Complexity (radon cc, threshold: <grade>)
-<N> violations  |  or: clean ✓
-
-### Maintainability Index (radon mi, floor: <N>)
-<N> files below floor  |  or: clean ✓
-Worst:
-  - <file> — MI <score>
-
 ### Verdict
 PASS ✓  |  FAIL ✗ — <N> issues remain
 ```
@@ -51,7 +43,7 @@ Extract score (middle token) from lines ending in `FAILED`.
 
 ## Verdict Rules
 
-- **PASS**: all tests green AND ruff clean AND complexipy clean AND radon within thresholds
+- **PASS**: all tests green AND ruff clean AND complexipy clean
 - **FAIL**: any tool reports a violation, or any test fails
 
 ## Saving Reports
