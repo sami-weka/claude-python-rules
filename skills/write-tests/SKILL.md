@@ -1,10 +1,6 @@
 ---
 name: write-tests
-description: Given a source file path or function description, generate a failing pytest test file in tests/. Tests are written before implementation (TDD red state). Confirms tests fail after writing.
-triggers:
-  - "write tests"
-  - "generate tests"
-  - "create test file"
+description: Generate a failing pytest test file for a source file or feature description. Use this skill at the START of any new feature or function — before writing implementation. Also use it when the user says "write tests for", "add test coverage", "test this module", or "TDD". The goal is always a red state: tests must fail before implementation exists. If you're tempted to look at the implementation first, don't — tests are written against the spec (type annotations, docstrings, function names), not the code.
 ---
 
 # write-tests Skill
@@ -13,17 +9,22 @@ Generate a failing pytest test file for a given source file or description.
 
 ## Rules
 
-1. Write tests BEFORE looking at implementation (if implementation exists, ignore it)
-2. Tests must fail initially — this is the TDD red state
-3. One test per logical behavior, not one per line of code
-4. Test file goes in `tests/test_<module_name>.py`
+1. Write tests BEFORE looking at the implementation body — treat it as a black box
+2. Base tests on the public API: function names, type annotations, docstrings
+3. Tests must fail initially — this confirms the red state
+4. One test per logical behavior (happy path, edge case, error case)
+5. Test file goes in `tests/test_<module_name>.py`
 
 ## What to Generate
 
-For each public function/class in the source:
-- One happy path test (normal inputs, expected output)
-- One or two edge case tests (empty input, boundary values, None, etc.)
-- Base tests on type annotations and docstrings — not on implementation
+For each public function or class:
+- **Happy path**: normal inputs, expected output
+- **Edge cases**: empty input, zero, None, boundary values, empty collections
+- **Error cases**: invalid types or values that should raise exceptions
+
+If there are no type annotations or docstrings, infer behavior from the function name
+and parameter names. Write the most reasonable contract you can, then confirm the red
+state — if tests pass unexpectedly, they may be too permissive.
 
 ## Test File Structure
 
@@ -47,17 +48,18 @@ def test_<function>_invalid_input():
         <function>(<invalid_input>)
 ```
 
+For classes, test construction, key methods, and state transitions.
+
 ## After Writing
 
-Run `task python:test:file FILE=tests/test_<module>.py` to confirm tests fail.
+Run `task python:test:file FILE=tests/test_<module>.py` to confirm the red state.
 
-Expected output: FAILED (one or more tests)
-
-If tests PASS before implementation exists, the tests are wrong — revise them.
+- Tests fail with `ImportError` or `ModuleNotFoundError` → module doesn't exist yet, red state confirmed
+- Tests fail with `AssertionError` → module exists but implementation is wrong, red state confirmed
+- Tests PASS → the tests are not testing the right behavior — revise them
 
 ## Return
 
-Confirm the red state:
 ```
 Tests written: tests/test_module.py
 Red state confirmed: 3 tests, 0 passed, 3 failed ✓

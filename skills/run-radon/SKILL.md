@@ -1,11 +1,6 @@
 ---
 name: run-radon
-description: Run radon to measure cyclomatic complexity (CC) and maintainability index (MI) of Python files. Parses stdout to enforce thresholds since radon always exits 0. Returns offending functions and files.
-triggers:
-  - "run radon"
-  - "check maintainability"
-  - "cyclomatic complexity"
-  - "maintainability index"
+description: Run radon to measure cyclomatic complexity (CC) and maintainability index (MI) of Python files. Use this skill when the user asks about "maintainability", "cyclomatic complexity", "code health", or "technical debt", or as part of the iterate-until-clean loop. Critical: radon always exits 0 even on violations — you must parse stdout, never rely on exit code. Always use this skill rather than running radon directly.
 ---
 
 # run-radon Skill
@@ -15,43 +10,40 @@ Run radon to check cyclomatic complexity (CC) and maintainability index (MI).
 ## CRITICAL: radon Always Exits 0
 
 Unlike ruff and complexipy, radon NEVER exits non-zero — even when thresholds are
-violated. You MUST parse stdout to determine whether violations exist.
+violated. Parse stdout to detect violations. Do not treat exit 0 as "clean".
 
 ## How to Use
 
-Call `task python:maintainability FILES=<path>`.
+`task python:maintainability FILES=<path>` runs two commands back-to-back:
+1. `radon cc -n <RADON_CC_MIN_GRADE> <path>` — lists functions at the threshold grade or worse
+2. `radon mi <path>` — lists MI scores for all files
 
-This runs two commands:
-1. `radon cc -n <RADON_CC_MIN_GRADE> <path>` — shows functions at or below the grade
-2. `radon mi <path>` — shows MI scores for all files
-
-Read thresholds from py-lint-driven.local.md:
-- `radon_cc_min_grade` — grade cutoff (A=best, F=worst). Default: C
-- `radon_mi_floor` — MI floor (0-100). Below this is a violation. Default: 20
+Thresholds from `py-lint-driven.local.md` (defaults if file missing):
+- `radon_cc_min_grade` — worst acceptable CC grade (default: C). Functions graded D, E, F are violations.
+- `radon_mi_floor` — minimum acceptable MI score 0–100 (default: 20). Files below this are violations.
 
 ## Parsing radon cc Output
 
-radon cc outputs functions in format:
+`radon cc -n C` lists functions graded C or worse (C, D, E, F). Each line shows:
 ```
 src/module.py
     F process_data:10 - D (25)
     M validate:45 - B (8)
 ```
+Format: `<type> <name>:<line> - <grade> (<score>)`
+Types: F=function, M=method, C=class
 
-Grade letters: A (1-5), B (6-10), C (11-15), D (16-20), E (21-25), F (26+)
-A function is a violation if its grade is WORSE than radon_cc_min_grade.
-"Worse" means later in the alphabet: C is worse than A, D is worse than C.
+Grade scale: A (1–5), B (6–10), C (11–15), D (16–20), E (21–25), F (26+)
+A function is a violation if its grade is worse than `radon_cc_min_grade` (i.e., later in alphabet).
 
 ## Parsing radon mi Output
 
-radon mi outputs:
 ```
 src/module.py - A (67.42)
 src/utils.py - C (12.38)
 ```
-
-Grade: A (>= 20 MI score), B (10-19), C (< 10)
-A file is a violation if its MI score is BELOW radon_mi_floor.
+MI score is the number in parentheses (0–100, higher is better).
+A file is a violation if its MI score is below `radon_mi_floor`.
 
 ## Return Format
 
@@ -65,4 +57,4 @@ Maintainability Index (floor: 20):
 - src/utils.py — MI 12.38 (below floor of 20)
 ```
 
-If clean, return: "radon: all functions and files within thresholds"
+If clean: "radon: all functions and files within thresholds"

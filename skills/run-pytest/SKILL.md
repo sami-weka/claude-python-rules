@@ -1,10 +1,6 @@
 ---
 name: run-pytest
-description: Run pytest on the tests/ directory or a specific test file. Returns structured pass/fail results. Distinguishes collection errors (broken imports) from assertion failures.
-triggers:
-  - "run pytest"
-  - "run tests"
-  - "check tests"
+description: Run pytest on the tests/ directory or a specific test file. Use this skill whenever you need to run tests, verify a TDD red state, check if an implementation satisfies tests, or when the user says "run tests", "do the tests pass", "check if this works", or "verify my changes". The key distinction this skill enforces — collection errors (broken imports) must stop iteration immediately; assertion failures are expected in TDD and should be iterated on.
 ---
 
 # run-pytest Skill
@@ -25,14 +21,14 @@ pytest exits non-zero on any failure or collection error.
 ERROR collecting tests/test_module.py
 ImportError: cannot import name 'process' from 'module'
 ```
-→ Surface immediately to the user. Do NOT iterate on collection errors —
-  the test file itself is broken and needs a fix before anything else.
+→ Stop immediately and surface to the user. Do NOT iterate on collection errors.
+  The test file is broken and must be fixed before anything else can run.
 
 **Assertion failures** (tests run but fail):
 ```
 FAILED tests/test_module.py::test_process - AssertionError: assert 0 == 1
 ```
-→ These are expected in TDD red state. Iterate on these by fixing implementation.
+→ Expected in TDD red state. Fix the implementation (never the test) and re-run.
 
 ## Return Format
 
@@ -56,3 +52,9 @@ COLLECTION ERROR — tests cannot run:
   tests/test_module.py: ImportError: cannot import name 'process'
   Fix the import before iterating.
 ```
+
+## Conftest and Import Path
+
+If pytest can't find modules (ModuleNotFoundError), check that `conftest.py` exists
+at the project root with `sys.path.insert(0, str(Path(__file__).parent))`.
+The `/setup` command creates this automatically — run it if missing.

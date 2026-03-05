@@ -1,10 +1,6 @@
 ---
 name: run-ruff
-description: Run ruff linter and formatter on Python files. Returns structured violations with file, line, rule code, and message. Supports check mode and auto-fix mode.
-triggers:
-  - "run ruff"
-  - "check ruff violations"
-  - "ruff lint"
+description: Run ruff linter and formatter on Python files. Use this skill whenever you need to check or fix Python style violations, unused imports, formatting issues, or lint errors. Invoke it after writing or editing any Python file, before committing, or when the user asks to "lint", "check style", "fix imports", or "clean up" Python code. Always prefer this over running ruff directly — it goes through the Taskfile.
 ---
 
 # run-ruff Skill
@@ -13,33 +9,37 @@ Run ruff on a Python file or directory and return structured results.
 
 ## How to Use
 
-Call `task python:ruff FILES=<path>` (or `task python:ruff` for the whole project).
+Check mode (read-only): `task python:ruff FILES=<path>`
+Check whole project: `task python:ruff`
+Auto-fix mode: `task python:ruff:fix FILES=<path>`
+Format: `task python:fmt FILES=<path>`
+Format check: `task python:fmt:check FILES=<path>`
 
-For auto-fix mode, call `task python:ruff:fix FILES=<path>`.
+Ruff picks up config automatically from `pyproject.toml` or `ruff.toml` if present.
 
 ## Parsing Output
 
-Ruff outputs violations in this format:
+Ruff outputs one violation per line:
 ```
 path/to/file.py:10:5: E501 Line too long (92 > 88 characters)
 ```
 
-Parse as: `<file>:<line>:<col>: <rule> <message>`
+Format: `<file>:<line>:<col>: <rule> <message>`
 
-Ruff exits non-zero if violations are found. Exit 0 means clean.
+Exit 0 = clean. Non-zero = violations found.
 
 ## Return Format
 
-Return a list of violations:
 ```
 File: path/to/file.py
 Line 10, Col 5: E501 — Line too long (92 > 88 characters)
+Line 23, Col 1: F401 — 'os' imported but unused
 ```
 
-If clean, return: "ruff: no violations found"
+If clean: "ruff: no violations found"
 
 ## Fix Mode
 
-In fix mode (`task python:ruff:fix`), ruff auto-fixes what it can. Some violations
-require manual fixes (complex logic issues). After fixing, always re-run check mode
-to confirm the file is clean.
+`task python:ruff:fix` auto-fixes the majority of violations. A small number (complex
+logic issues, ambiguous rewrites) require manual fixes. After auto-fixing, always
+re-run check mode to confirm the file is clean before moving on.
