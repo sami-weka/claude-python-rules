@@ -29,7 +29,7 @@ Bootstrap the current project with all py-lint-driven tooling.
 
    If any are missing, show install instructions and stop:
    ```
-   pip install ruff complexipy xenon pytest
+   pip install ruff complexipy xenon pytest pytest-cov
    brew install go-task
    ```
 

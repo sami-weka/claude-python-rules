@@ -42,6 +42,7 @@ conftest.py
 | Command | What it does |
 |---|---|
 | `/setup` | Bootstrap a new project with all tooling |
+| `/update` | Re-sync templates to the latest plugin version |
 | `/tdd <description>` | Write failing tests → implement → iterate until clean |
 | `/tdd-test <file>` | Generate tests for an existing file, confirm red state |
 | `/lint-fix [path]` | Fix all lint and test issues, iterate until clean |
@@ -60,7 +61,9 @@ task python:lint         # ruff + complexipy + xenon
 task python:lint:fast    # ruff only
 task python:check        # lint + format check (read-only)
 task python:fix          # lint:fix + fmt
-task python:test         # pytest only
+task python:test                # pytest only
+task python:test:coverage       # pytest + coverage report
+task python:test:coverage:check # pytest + coverage, fail if below MIN_COVERAGE (default 80%)
 task python:complexity   # complexipy only
 task python:cyclomatic   # xenon only
 task python:ci           # CI mode: checks changed .py files only

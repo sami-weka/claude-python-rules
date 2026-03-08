@@ -83,7 +83,7 @@ jobs:
           restore-keys: ${{ runner.os }}-pip-checks-
 
       - name: Install tools
-        run: pip install ruff complexipy xenon pytest
+        run: pip install ruff complexipy xenon pytest pytest-cov
 
       - uses: arduino/setup-task@v2
 

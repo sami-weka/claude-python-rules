@@ -53,6 +53,20 @@ COLLECTION ERROR — tests cannot run:
   Fix the import before iterating.
 ```
 
+## Coverage
+
+To see which lines are not covered by tests:
+```bash
+task python:test:coverage
+```
+
+To enforce a minimum coverage threshold (fails if below MIN_COVERAGE, default 80%):
+```bash
+task python:test:coverage:check
+```
+
+Change the threshold by editing `MIN_COVERAGE` in `taskfiles/Taskfile.python.yaml`.
+
 ## Conftest and Import Path
 
 If pytest can't find modules (ModuleNotFoundError), check that `conftest.py` exists

@@ -10,6 +10,7 @@ vars:
   XENON_MAX_ABSOLUTE: "B"
   XENON_MAX_MODULES: "A"
   XENON_MAX_AVERAGE: "A"
+  MIN_COVERAGE: "80"
 
 tasks:
 
@@ -54,6 +55,16 @@ tasks:
     desc: "Run pytest on a specific test file. Pass FILE=path/to/test.py"
     cmds:
       - pytest {{.FILE}} -v
+
+  test:coverage:
+    desc: "Run pytest with coverage report (shows missing lines)"
+    cmds:
+      - pytest tests/ -v --cov=src --cov-report=term-missing
+
+  test:coverage:check:
+    desc: "Run pytest with coverage — fails if below MIN_COVERAGE percent"
+    cmds:
+      - pytest tests/ -v --cov=src --cov-report=term-missing --cov-fail-under={{.MIN_COVERAGE}}
 
   test:watch:
     desc: "Run pytest in watch mode (local use only, requires pytest-watch)"
