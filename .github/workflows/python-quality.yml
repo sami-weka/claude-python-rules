@@ -51,29 +51,19 @@ jobs:
         run: |
           complexipy ${{ steps.changed.outputs.files }} > /tmp/cx.txt || true
           python3 - << 'EOF'
-          import re, subprocess
-          threshold = 15
-          try:
-              out = subprocess.check_output(
-                  ["python3", "-c",
-                   "import tomllib; d=tomllib.load(open('pyproject.toml','rb')); "
-                   "print(d.get('tool',{}).get('complexipy',{}).get('max-complexity-allowed',15))"],
-                  text=True).strip()
-              threshold = int(out)
-          except Exception:
-              pass
-          current_file = None
-          with open("/tmp/cx.txt") as f:
-              for line in f:
-                  line = line.rstrip()
-                  stripped = line.strip()
-                  if stripped.endswith(".py") and not line.startswith("    "):
-                      current_file = stripped
-                  elif stripped.endswith("FAILED") and current_file:
-                      parts = stripped.split()
-                      func_name, score = parts[0], parts[1]
-                      print(f"::warning file={current_file}::Function '{func_name}' has cognitive complexity {score} (threshold: {threshold})")
-          EOF
+import re
+current_file = None
+with open("/tmp/cx.txt") as f:
+    for line in f:
+        line = line.rstrip()
+        stripped = line.strip()
+        if stripped.endswith(".py") and not line.startswith(" "):
+            current_file = stripped.removeprefix("./")
+        elif stripped.endswith("FAILED") and current_file:
+            parts = stripped.split()
+            func_name, score = parts[0], parts[1]
+            print(f"::warning file={current_file}::Function '{func_name}' has cognitive complexity {score}")
+EOF
 
   checks:
     name: Quality Checks
@@ -98,5 +88,26 @@ jobs:
 
       - uses: arduino/setup-task@v2
 
-      - name: Run CI quality checks
-        run: task python:ci
+      - name: Get changed Python files
+        id: changed
+        run: |
+          FILES=$(git diff --name-only --diff-filter=ACMRT origin/${{ github.base_ref }}...HEAD -- '*.py' | tr '\n' ' ')
+          echo "files=$FILES" >> $GITHUB_OUTPUT
+
+      - name: ruff
+        if: steps.changed.outputs.files != ''
+        run: task python:ruff FILES="${{ steps.changed.outputs.files }}"
+
+      - name: complexipy
+        if: steps.changed.outputs.files != ''
+        run: task python:complexity FILES="${{ steps.changed.outputs.files }}"
+
+      - name: xenon
+        run: |
+          XENON_MAX_ABSOLUTE=${{ vars.XENON_MAX_ABSOLUTE || 'B' }} \
+          XENON_MAX_MODULES=${{ vars.XENON_MAX_MODULES || 'A' }} \
+          XENON_MAX_AVERAGE=${{ vars.XENON_MAX_AVERAGE || 'A' }} \
+          task python:cyclomatic
+
+      - name: pytest
+        run: task python:test
