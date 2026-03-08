@@ -31,9 +31,12 @@ Re-sync project templates to the latest plugin version.
    - If different: replace with the template, note what changed in one line
 
 2. **Update CI workflow**
-   Read `.github/workflows/python-quality.yml` and the template.
+   Compare `.github/workflows/python-quality.yml` with
+   `${CLAUDE_PLUGIN_ROOT}/templates/.github/workflows/python-quality.yml`.
+   - If the project file does not exist: copy the template, report "created"
    - If identical: skip with "already up to date"
-   - If different: replace with the template, note what changed in one line
+   - If different: overwrite `.github/workflows/python-quality.yml` with the template
+     content, note what changed in one line
 
 3. **Merge config**
    Read the YAML frontmatter of `py-lint-driven.local.md` and the template.
@@ -44,7 +47,7 @@ Re-sync project templates to the latest plugin version.
 
 4. **Check pyproject.toml**
    Read `pyproject.toml` if it exists. Check for these sections:
-   `[tool.ruff]`, `[tool.pytest.ini_options]`, `[tool.coverage.run]`
+   `[tool.ruff]`, `[tool.pytest.ini_options]`, `[tool.coverage.run]`, `[tool.complexipy]`
    For any missing, note them in the report so the user can add them manually.
 
 5. **Report**
@@ -56,6 +59,7 @@ Re-sync project templates to the latest plugin version.
      skipped  Taskfile.yaml  (not managed by /update)
 
    pyproject.toml — missing sections (add manually):
+     [tool.complexipy]  — max-complexity-allowed = 15
      [tool.coverage.run]  — source = ["src"], omit = ["tests/*"]
      [tool.coverage.report]  — show_missing = true
    ```
