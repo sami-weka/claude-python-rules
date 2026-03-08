@@ -42,8 +42,32 @@ Bootstrap the current project with all py-lint-driven tooling.
    - `${CLAUDE_PLUGIN_ROOT}/templates/Taskfile.yaml` → `Taskfile.yaml`
    - `${CLAUDE_PLUGIN_ROOT}/templates/Taskfile.python.yaml` → `taskfiles/Taskfile.python.yaml`
    - `${CLAUDE_PLUGIN_ROOT}/templates/py-lint-driven.local.md` → `py-lint-driven.local.md`
-   - `${CLAUDE_PLUGIN_ROOT}/templates/pyproject.toml` → `pyproject.toml`
    - `${CLAUDE_PLUGIN_ROOT}/templates/.github/workflows/python-quality.yml` → `.github/workflows/python-quality.yml`
+
+   **pyproject.toml — special handling:**
+   - If `pyproject.toml` does not exist: copy `${CLAUDE_PLUGIN_ROOT}/templates/pyproject.toml` → `pyproject.toml`
+   - If `pyproject.toml` already exists: do NOT overwrite it. Instead, check whether
+     `[tool.ruff]` and `[tool.pytest.ini_options]` sections are present. If either is
+     missing, show the user exactly what to add:
+
+     ```toml
+     [tool.ruff]
+     line-length = 88
+     target-version = "py311"
+
+     [tool.ruff.lint]
+     select = ["E", "W", "F", "I", "B", "UP"]
+     ignore = []
+
+     [tool.ruff.lint.isort]
+     known-first-party = ["src"]
+
+     [tool.pytest.ini_options]
+     testpaths = ["tests"]
+     addopts = "-v"
+     ```
+
+     Tell the user: "Your pyproject.toml exists — add the missing sections above."
 
 4. **Create conftest.py**
    If `conftest.py` does not exist, create it:

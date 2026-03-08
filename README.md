@@ -10,6 +10,7 @@ Every time you write or edit a Python file, Claude runs quality checks and fixes
 - **complexipy** — cognitive complexity per function (default threshold: 15)
 - **xenon** — cyclomatic complexity (default: max-absolute B, max-modules A, max-average A)
 - **pytest** — tests must pass
+- **mypy** — type checking (opt-in, set `mypy_enabled: true` in `py-lint-driven.local.md`)
 
 ## Prerequisites
 
@@ -63,6 +64,7 @@ task python:fix          # lint:fix + fmt
 task python:test         # pytest only
 task python:complexity   # complexipy only
 task python:cyclomatic   # xenon only
+task python:mypy         # type checking (opt-in)
 task python:ci           # CI mode: checks changed .py files only
 ```
 
@@ -85,6 +87,7 @@ Edit `py-lint-driven.local.md` in your project root:
 ```yaml
 ---
 max_cognitive_complexity: 15
+mypy_enabled: false
 xenon_max_absolute: B
 xenon_max_modules: A
 xenon_max_average: A
@@ -103,6 +106,7 @@ tdd_enabled: true
 | `xenon_max_average` | project-wide average grade allowed (A–F) |
 | `iteration_limit` | max fix/verify cycles before giving up |
 | `hooks_enabled` | disable automatic checks on file write/edit |
+| `mypy_enabled` | include mypy type checking in lint and tdd tasks (opt-in) |
 | `hooks_run_complexity` | include complexipy+xenon in hooks (slower) |
 | `tdd_enabled` | include tests in hooks |
 

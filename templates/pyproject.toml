@@ -19,3 +19,9 @@ known-first-party = ["src"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-v"
+
+# mypy is opt-in. Enable with: task python:mypy
+# Uncomment and configure if you use type annotations:
+# [tool.mypy]
+# python_version = "3.11"
+# ignore_missing_imports = true
