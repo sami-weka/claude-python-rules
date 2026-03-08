@@ -1,6 +1,5 @@
 ---
 max_cognitive_complexity: 15
-mypy_enabled: false
 xenon_max_absolute: B
 xenon_max_modules: A
 xenon_max_average: A
@@ -17,7 +16,6 @@ Edit the YAML frontmatter above to configure thresholds and behavior.
 ## Settings
 
 - `max_cognitive_complexity` — functions exceeding this score are flagged by complexipy (default: 15)
-- `mypy_enabled` — set to true to include mypy type checking in `lint:` and `tdd:` (requires mypy installed, default: false)
 - `xenon_max_absolute` — worst single function cyclomatic complexity grade allowed: A–F (default: B)
 - `xenon_max_modules` — worst module average grade allowed: A–F (default: A)
 - `xenon_max_average` — project-wide average grade allowed: A–F (default: A)

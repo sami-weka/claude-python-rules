@@ -1,0 +1,26 @@
+{
+  "functions": [
+    {
+      "complexity": 0,
+      "file_name": "test_complexity.py",
+      "function_name": "simple",
+      "path": "test_complexity.py"
+    },
+    {
+      "complexity": 25,
+      "file_name": "test_complexity.py",
+      "function_name": "complex_func",
+      "path": "test_complexity.py"
+    },
+    {
+      "complexity": 0,
+      "file_name": "main.py",
+      "function_name": "add",
+      "path": "main.py"
+    }
+  ],
+  "targets": [
+    "/private/tmp/test-project/main.py",
+    "/private/tmp/test_complexity.py"
+  ]
+}

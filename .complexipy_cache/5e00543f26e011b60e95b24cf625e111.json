@@ -1,0 +1,19 @@
+{
+  "functions": [
+    {
+      "complexity": 0,
+      "file_name": "main.py",
+      "function_name": "add",
+      "path": "test-project/main.py"
+    },
+    {
+      "complexity": 0,
+      "file_name": "test_main.py",
+      "function_name": "test_add",
+      "path": "test-project/tests/test_main.py"
+    }
+  ],
+  "targets": [
+    "/private/tmp/test-project"
+  ]
+}

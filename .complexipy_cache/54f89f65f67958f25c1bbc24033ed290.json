@@ -1,0 +1,13 @@
+{
+  "functions": [
+    {
+      "complexity": 31,
+      "file_name": "dirty.py",
+      "function_name": "deeply_nested",
+      "path": "dirty.py"
+    }
+  ],
+  "targets": [
+    "/private/tmp/e2e-test/src/dirty.py"
+  ]
+}
