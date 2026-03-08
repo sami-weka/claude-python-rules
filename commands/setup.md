@@ -47,8 +47,8 @@ Bootstrap the current project with all py-lint-driven tooling.
    **pyproject.toml — special handling:**
    - If `pyproject.toml` does not exist: copy `${CLAUDE_PLUGIN_ROOT}/templates/pyproject.toml` → `pyproject.toml`
    - If `pyproject.toml` already exists: do NOT overwrite it. Instead, check whether
-     `[tool.ruff]` and `[tool.pytest.ini_options]` sections are present. If either is
-     missing, show the user exactly what to add:
+     `[tool.ruff]`, `[tool.pytest.ini_options]`, and `[tool.complexipy]` sections are
+     present. For each missing section, show the user exactly what to add:
 
      ```toml
      [tool.ruff]
@@ -65,6 +65,9 @@ Bootstrap the current project with all py-lint-driven tooling.
      [tool.pytest.ini_options]
      testpaths = ["tests"]
      addopts = "-v"
+
+     [tool.complexipy]
+     max-complexity-allowed = 15
      ```
 
      Tell the user: "Your pyproject.toml exists — add the missing sections above."

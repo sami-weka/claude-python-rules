@@ -7,7 +7,7 @@ for Python. Linter rules act as the spec — Claude generates code that satisfie
 TDD is built into the core loop: Claude writes tests first, then implementation, then
 iterates until both tests pass and linting is clean.
 
-**Tools:** ruff, complexipy, radon, pytest
+**Tools:** ruff, complexipy, xenon, pytest
 **Trigger:** automatic via hooks on every Write/Edit, and manual via slash commands
 **Architecture:** skill-first composable — skills are atomic units, commands compose
 skills into workflows, agents handle multi-step reasoning, hooks trigger automatically
@@ -22,7 +22,6 @@ py-lint-driven/
 ├── skills/
 │   ├── run-ruff/SKILL.md
 │   ├── run-complexipy/SKILL.md
-│   ├── run-radon/SKILL.md
 │   ├── run-pytest/SKILL.md
 │   ├── write-tests/SKILL.md
 │   ├── iterate-until-clean/SKILL.md
@@ -31,13 +30,14 @@ py-lint-driven/
 │   ├── lint-fix.md
 │   ├── lint-check.md
 │   ├── quality-report.md
+│   ├── setup.md
+│   ├── update.md
 │   ├── tdd.md
 │   └── tdd-test.md
 ├── agents/
 │   └── lint-iterator.md
 └── hooks/
-    ├── post-write-quality.json
-    └── post-edit-quality.json
+    └── hooks.json
 ```
 
 ---
@@ -47,181 +47,43 @@ py-lint-driven/
 Single config file: `py-lint-driven.local.md`
 
 ```yaml
-max_cognitive_complexity: 15
-radon_cc_min_grade: C
-radon_mi_floor: 20
+# plugin behavior — tool thresholds go in pyproject.toml (complexipy) or here (xenon)
+xenon_max_absolute: B
+xenon_max_modules: A
+xenon_max_average: A
 iteration_limit: 5
 hooks_enabled: true
 hooks_run_complexity: false
 tdd_enabled: true
 ```
 
-No profile management. Teams edit this file directly to change thresholds.
+No profile management. Teams edit this file directly to change behavior and xenon thresholds.
 `tdd_enabled: false` reverts hooks to lint-only behavior.
 `hooks_run_complexity: false` (default) makes hooks run `task python:tdd:fast`
-(tests + ruff only). Set to `true` to run full complexity and maintainability
-checks on every write/edit.
+(tests + ruff only). Set to `true` to run full complexity checks on every write/edit.
 
-Threshold values (`max_cognitive_complexity`, `radon_cc_min_grade`, `radon_mi_floor`)
-are mirrored as defaults in `taskfiles/Taskfile.python.yaml` vars. Ruff configuration
-lives in `pyproject.toml` or `ruff.toml` and is auto-discovered by ruff — no separate
-plugin config needed for ruff rules.
+**Tool config sources:**
+- ruff: `pyproject.toml` `[tool.ruff]` — auto-discovered by ruff
+- complexipy: `pyproject.toml` `[tool.complexipy]` `max-complexity-allowed` — auto-discovered by complexipy
+- xenon: `py-lint-driven.local.md` fields above — passed as env vars at runtime (xenon has no config file support)
+- pytest: `pyproject.toml` `[tool.pytest.ini_options]` — auto-discovered by pytest
 
 ---
 
 ## Taskfile Integration
 
 The plugin delegates all tool invocation to Taskfile. Skills call tasks and parse
-stdout — they never invoke ruff, complexipy, radon, or pytest directly.
+stdout — they never invoke ruff, complexipy, xenon, or pytest directly.
 
-```yaml
-# Taskfile.yaml
-version: '3'
+The Taskfile template lives at `templates/Taskfile.python.yaml` in the plugin repo and
+is copied to `taskfiles/Taskfile.python.yaml` in the user project by `/setup`. Xenon
+vars in that file (`XENON_MAX_ABSOLUTE`, `XENON_MAX_MODULES`, `XENON_MAX_AVERAGE`) act
+as fallback defaults — hooks and skills always override them by passing values from
+`py-lint-driven.local.md` as env vars at invocation time
+(e.g., `XENON_MAX_ABSOLUTE=B task python:cyclomatic`).
 
-includes:
-  python: ./taskfiles/Taskfile.python.yaml
-```
-
-```yaml
-# taskfiles/Taskfile.python.yaml
-# NOTE: tasks here have NO 'python:' prefix — the includes directive adds it.
-# Invoke as: task python:lint, task python:test, etc.
-# Within this file, tasks reference siblings by short name (e.g. task: lint).
-version: '3'
-
-vars:
-  MAX_COGNITIVE_COMPLEXITY: "15"
-  RADON_CC_MIN_GRADE: "C"
-
-tasks:
-
-  # --- Leaf tasks: direct tool invocations ---
-
-  ruff:
-    desc: "Run ruff check (config auto-discovered from pyproject.toml or ruff.toml)"
-    cmds:
-      - ruff check {{.FILES | default "."}}
-
-  ruff:fix:
-    desc: "Run ruff check with auto-fix"
-    cmds:
-      - ruff check --fix {{.FILES | default "."}}
-
-  complexity:
-    desc: "Run complexipy with configured max cognitive complexity threshold"
-    cmds:
-      - complexipy -C {{.MAX_COGNITIVE_COMPLEXITY}} {{.FILES | default "."}}
-
-  maintainability:
-    desc: "Run radon cc and mi (output parsed by run-radon skill for threshold enforcement)"
-    cmds:
-      - radon cc -n {{.RADON_CC_MIN_GRADE}} {{.FILES | default "."}}
-      - radon mi {{.FILES | default "."}}
-
-  fmt:
-    desc: "Run ruff format"
-    cmds:
-      - ruff format {{.FILES | default "."}}
-
-  fmt:check:
-    desc: "Run ruff format check (no changes applied)"
-    cmds:
-      - ruff format --check {{.FILES | default "."}}
-
-  # --- Composite tasks ---
-
-  lint:fast:
-    desc: "Run ruff only (fast, for hooks)"
-    cmds:
-      - task: ruff
-      - echo "--> Ruff check passed"
-
-  lint:
-    desc: "Run all linters (ruff + complexity + maintainability)"
-    cmds:
-      - task: ruff
-      - task: complexity
-      - task: maintainability
-      - echo "--> All Python linters passed"
-
-  lint:fix:
-    desc: "Run ruff auto-fix, then check complexity and maintainability (only ruff violations are auto-fixable)"
-    cmds:
-      - task: ruff:fix
-      - task: complexity
-      - task: maintainability
-      - echo "--> Ruff auto-fix applied, linters checked"
-
-  check:
-    desc: "Run all checks (lint + format check)"
-    cmds:
-      - task: lint
-      - task: fmt:check
-      - echo "--> All Python checks passed"
-
-  fix:
-    desc: "Auto-fix and format"
-    cmds:
-      - task: lint:fix
-      - task: fmt
-      - echo "--> Auto-fix and format complete"
-
-  test:
-    desc: "Run pytest on the tests/ directory"
-    cmds:
-      - pytest tests/ -v
-
-  test:file:
-    desc: "Run pytest on a specific test file"
-    cmds:
-      - pytest {{.FILE}} -v
-
-  test:watch:
-    desc: "Run pytest in watch mode (requires pytest-watch, local use only)"
-    cmds:
-      - ptw tests/
-
-  tdd:fast:
-    desc: "Tests + ruff only (fast, used by hooks when hooks_run_complexity is false)"
-    cmds:
-      - task: test
-      - task: lint:fast
-      - echo "--> Tests passed and ruff clean"
-
-  tdd:
-    desc: "Full TDD + lint cycle (tests + ruff + complexity + maintainability)"
-    cmds:
-      - task: test
-      - task: lint
-      - echo "--> All tests passed and linting clean"
-
-  tdd:fix:
-    desc: "Full TDD + lint cycle with auto-fix"
-    cmds:
-      - task: test
-      - task: lint:fix
-      - task: fmt
-      - echo "--> TDD cycle complete with fixes applied"
-
-  ci:
-    desc: "Run all checks for CI on changed Python files only"
-    vars:
-      CHANGED_PY_FILES:
-        sh: "git fetch origin ${GITHUB_BASE_REF:-main} --quiet && git diff --name-only --diff-filter=ACMRT origin/${GITHUB_BASE_REF:-main}...HEAD -- '*.py' | tr '\n' ' '"
-    # status: exits 0 when no files changed → Taskfile skips all cmds cleanly (exit 0)
-    # This is correct CI behavior: no changed files = pass, not error
-    status:
-      - '[ -z "{{.CHANGED_PY_FILES}}" ]'
-    cmds:
-      - task: ruff
-        vars: { FILES: "{{.CHANGED_PY_FILES}}" }
-      - task: complexity
-        vars: { FILES: "{{.CHANGED_PY_FILES}}" }
-      - task: maintainability
-        vars: { FILES: "{{.CHANGED_PY_FILES}}" }
-      - task: test
-      - echo "--> CI checks passed"
-```
+complexipy has no Taskfile vars — it reads its threshold directly from
+`pyproject.toml` `[tool.complexipy]`.
 
 ### Taskfile Ownership
 
@@ -231,15 +93,17 @@ files. On first run (or via `/lint-check`), the plugin checks for their existenc
 - If `Taskfile.yaml` exists but lacks a `python:` include, the plugin appends the
   include entry and generates `taskfiles/Taskfile.python.yaml`.
 - If `taskfiles/Taskfile.python.yaml` already exists, the plugin does not overwrite it —
-  the user owns it. Threshold defaults in the file should be kept in sync manually
-  with `py-lint-driven.local.md`.
+  the user owns it. `py-lint-driven.local.md` is the source of truth for thresholds;
+  hooks and skills pass those values as env vars at runtime, so the Taskfile var
+  defaults are always overridden.
 
 ### CI Notes
 
 - `GITHUB_BASE_REF` is set automatically by GitHub Actions on `pull_request` events.
   Falls back to `main` for local runs.
 - `--diff-filter=ACMRT` excludes deleted files — no point linting removed code.
-- Lint tools (ruff, complexipy, radon) run on **changed files only** for speed.
+- Lint tools (ruff, complexipy) run on **changed files only** for speed. xenon always
+  runs on the full project (no file scoping).
 - pytest runs on **full `tests/`** — a source change can break unrelated tests,
   so scoping pytest to changed files is unsafe.
 - Do NOT use `tj-actions/changed-files` — compromised in a supply chain attack
@@ -247,15 +111,9 @@ files. On first run (or via `/lint-check`), the plugin checks for their existenc
 - Within `taskfiles/Taskfile.python.yaml`, sibling tasks are referenced by short name
   (e.g. `task: lint`, `task: ruff`). Taskfile v3 resolves these to the full namespaced
   name (`python:lint`, `python:ruff`) at runtime via the `includes` directive.
-- **Exit code asymmetry**: `complexipy` exits non-zero when violations exceed the
-  threshold — `task python:lint` and `task python:ci` will correctly fail on complexity
-  violations. `radon cc` and `radon mi` always exit 0 regardless of results. Radon
-  enforcement is handled exclusively by the `run-radon` skill parsing stdout and
-  comparing scores against `radon_cc_min_grade` and `radon_mi_floor`. Task chains will
-  not fail on radon violations alone.
-- `radon mi` runs without a `--min` filter — the full output is returned for the
-  `run-radon` skill to parse. Filtering with `--min` would hide below-floor files,
-  defeating the purpose.
+- **Exit codes**: both `complexipy` and `xenon` exit non-zero on violations — task
+  chains (`task python:lint`, `task python:ci`) will correctly fail when thresholds are
+  exceeded. No stdout parsing required for threshold enforcement.
 
 ### Skill-to-Task Mapping
 
@@ -263,7 +121,6 @@ files. On first run (or via `/lint-check`), the plugin checks for their existenc
 |---|---|
 | `run-ruff` | `task python:ruff` |
 | `run-complexipy` | `task python:complexity` |
-| `run-radon` | `task python:maintainability` (stdout parsed for threshold enforcement) |
 | `run-pytest` | `task python:test` |
 | `write-tests` | writes file, then `task python:test:file` |
 | `iterate-until-clean` (fix pass) | `task python:tdd:fix` |
@@ -284,12 +141,6 @@ Supports fix mode via `task python:ruff:fix` for auto-fixable violations.
 ### `run-complexipy`
 Calls `task python:complexity`. Returns functions/classes exceeding the configured
 cognitive complexity threshold. Output includes function name, file, line, score.
-
-### `run-radon`
-Calls `task python:maintainability`. Since radon always exits 0 regardless of results,
-this skill parses stdout directly to detect violations. It compares CC grades against
-`radon_cc_min_grade` and MI scores against `radon_mi_floor` from config, then returns
-a structured list of offending functions and files.
 
 ### `run-pytest`
 Calls `task python:test`. Returns structured output: test count, pass/fail per test,

@@ -1,7 +1,7 @@
 {
   "name": "py-lint-driven",
   "version": "1.0.0",
-  "description": "Linter-driven and test-driven development for Python. Enforces ruff, complexipy, radon, and pytest automatically.",
+  "description": "Linter-driven and test-driven development for Python. Enforces ruff, complexipy, xenon, and pytest automatically.",
   "author": {
     "name": "sami-weka"
   },

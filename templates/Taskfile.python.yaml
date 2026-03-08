@@ -6,7 +6,6 @@
 version: '3'
 
 vars:
-  MAX_COGNITIVE_COMPLEXITY: "15"
   XENON_MAX_ABSOLUTE: "B"
   XENON_MAX_MODULES: "A"
   XENON_MAX_AVERAGE: "A"
@@ -27,9 +26,9 @@ tasks:
       - ruff check --fix {{.FILES | default "."}}
 
   complexity:
-    desc: "Run complexipy — exits non-zero if cognitive complexity exceeds MAX_COGNITIVE_COMPLEXITY"
+    desc: "Run complexipy — threshold read from pyproject.toml [tool.complexipy]"
     cmds:
-      - complexipy -mx {{.MAX_COGNITIVE_COMPLEXITY}} {{.FILES | default "."}}
+      - complexipy {{.FILES | default "."}}
 
   cyclomatic:
     desc: "Run xenon — exits non-zero if cyclomatic complexity exceeds thresholds (always runs on .)"

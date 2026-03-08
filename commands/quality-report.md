@@ -1,6 +1,6 @@
 ---
 name: quality-report
-description: Deep complexity analysis. Runs ruff and complexipy only (no tests). Highlights the 5 most complex functions. Saves a timestamped report.
+description: Deep complexity analysis. Runs ruff, complexipy, and xenon (no tests). Highlights the 5 most complex functions. Saves a timestamped report.
 argument-hint: "[path — optional, defaults to current directory]"
 ---
 
@@ -14,18 +14,29 @@ Deep quality analysis focused on complexity metrics.
 
 ## Flow
 
-1. **Run lint check**
+1. **Read config**
+   Read `py-lint-driven.local.md` for xenon threshold values. Defaults:
+   `xenon_max_absolute=B, xenon_max_modules=A, xenon_max_average=A`
+
+2. **Run lint check**
    Run `task python:ruff FILES=$ARGUMENTS` — collect ruff violations.
 
-2. **Run complexity check**
-   Call `run-complexipy` skill: `task python:complexity FILES=$ARGUMENTS`
+3. **Run cognitive complexity check**
+   Run `task python:complexity FILES=$ARGUMENTS`
+   complexipy reads its threshold from `pyproject.toml` `[tool.complexipy]` automatically.
+   Use the `run-complexipy` skill to parse and format output.
 
-3. **Build deep report**
+4. **Run cyclomatic complexity check**
+   Run `XENON_MAX_ABSOLUTE=<value> XENON_MAX_MODULES=<value> XENON_MAX_AVERAGE=<value> task python:cyclomatic`
+   (xenon always analyzes the full project, `$ARGUMENTS` is not applied here)
+
+5. **Build deep report**
    Use the `report-quality` skill. Include:
    - Top 5 most complex functions (highest complexipy score)
+   - Cyclomatic complexity grade summary (xenon output)
    - Full list of ruff violations
 
-4. **Save report**
+6. **Save report**
    Save to `.claude/py-lint-driven/reports/YYYY-MM-DD-HH-MM-<sanitized-path>.md`
    Create the directory if it doesn't exist.
    Inform the user where the report was saved.

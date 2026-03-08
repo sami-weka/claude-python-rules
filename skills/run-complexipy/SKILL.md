@@ -13,14 +13,20 @@ Check a file or directory: `task python:complexity FILES=<path>`
 Check whole project: `task python:complexity`
 Show only failures: `complexipy -f -mx <threshold> <path>`
 
-The threshold comes from `py-lint-driven.local.md` (`max_cognitive_complexity`, default: 15),
-which must match `MAX_COGNITIVE_COMPLEXITY` in `taskfiles/Taskfile.python.yaml`.
+The threshold comes from `pyproject.toml` under `[tool.complexipy]`:
+
+```toml
+[tool.complexipy]
+max-complexity-allowed = 15
+```
+
+complexipy reads this natively — no env var or CLI flag needed when calling the task.
 
 ## Exit Codes Matter
 
 complexipy exits non-zero when ANY function exceeds the threshold. This stops task
 chains like `task python:lint` immediately — so a complexity failure will prevent
-radon from running in the same chain.
+xenon from running in the same chain.
 
 ## Parsing Output
 

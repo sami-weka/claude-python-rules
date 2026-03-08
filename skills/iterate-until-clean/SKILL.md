@@ -9,8 +9,18 @@ The core fix/verify loop. Keeps trying until everything is green or the limit is
 
 ## Config
 
-Read `iteration_limit` from `py-lint-driven.local.md` if it exists. If the file is
-missing, use the default: `iteration_limit = 5`.
+Read these values from `py-lint-driven.local.md` if it exists. Use defaults if missing:
+
+- `iteration_limit` → default: 5
+- `xenon_max_absolute` → default: B
+- `xenon_max_modules` → default: A
+- `xenon_max_average` → default: A
+
+Set the xenon values as env vars before every task invocation that includes xenon:
+`XENON_MAX_ABSOLUTE=<value> XENON_MAX_MODULES=<value> XENON_MAX_AVERAGE=<value>`
+
+complexipy reads its threshold from `pyproject.toml` `[tool.complexipy]` natively —
+no env var needed.
 
 ## Always Full Lint
 
@@ -22,7 +32,9 @@ This skill always runs full lint (ruff + complexipy + xenon). The fast/full dist
 For each iteration (starting at 1):
 
 ### Fix Pass
-Run `task python:tdd:fix`
+Run with xenon thresholds as env vars:
+`XENON_MAX_ABSOLUTE=<value> XENON_MAX_MODULES=<value> XENON_MAX_AVERAGE=<value> task python:tdd:fix`
+
 This runs: test → ruff:fix → complexity check → cyclomatic check → fmt
 
 Handle each failure type:
@@ -32,7 +44,9 @@ Handle each failure type:
 - **Cyclomatic violations (xenon)** → same as complexity: propose a refactor, confirm with user, then apply.
 
 ### Verify Pass
-Run `task python:tdd`
+Run with the same xenon env var prefix:
+`XENON_MAX_ABSOLUTE=<value> XENON_MAX_MODULES=<value> XENON_MAX_AVERAGE=<value> task python:tdd`
+
 This runs: test → ruff → complexipy → xenon (read-only, no fixes)
 
 If fully green → done. Report success and stop.
