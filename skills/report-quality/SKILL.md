@@ -27,11 +27,33 @@ Top offenders:
 ### Cyclomatic Complexity (xenon, max-absolute: <grade>, max-modules: <grade>, max-average: <grade>)
 <N> violations  |  or: clean ✓
 
+### Combined Findings
+<see below>
+
 ### Verdict
 PASS ✓  |  FAIL ✗ — <N> issues remain
 ```
 
 If a tool was not run, mark its section as "not checked" rather than assuming clean.
+
+## Combined Findings
+
+After collecting all tool outputs, identify functions or files flagged by MORE than
+one tool. Surface these as combined findings — they share a root cause and should be
+fixed together.
+
+```
+### Combined Findings
+
+⚠ process_data in src/module.py — flagged by both complexipy (score: 18) AND xenon
+  (rank C). Both violations point to the same root cause: this function is too
+  complex and needs refactoring. Fix once, both checks will clear.
+
+⚠ src/utils.py — ruff violations (3) AND xenon module rank B. Cleaning up the ruff
+  violations may reduce complexity indirectly; refactor after ruff is clean.
+```
+
+If no function or file appears in more than one tool's output, omit this section.
 
 ## Extracting Cognitive Complexity Scores
 

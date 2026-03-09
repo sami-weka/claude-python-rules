@@ -6,71 +6,31 @@ description: Core fix/verify loop that runs until tests pass and linting is clea
 # iterate-until-clean Skill
 
 The core fix/verify loop. Keeps trying until everything is green or the limit is hit.
+See `reference.md` in this directory for detailed failure handling and fix strategies.
 
 ## Config
 
-Read these values from `py-lint-driven.local.md` if it exists. Use defaults if missing:
+Read from `py-lint-driven.local.md` (defaults if missing):
+- `iteration_limit` → 5
+- `xenon_max_absolute` → B
+- `xenon_max_modules` → A
+- `xenon_max_average` → A
 
-- `iteration_limit` → default: 5
-- `xenon_max_absolute` → default: B
-- `xenon_max_modules` → default: A
-- `xenon_max_average` → default: A
+Prefix xenon tasks with env vars: `XENON_MAX_ABSOLUTE=<v> XENON_MAX_MODULES=<v> XENON_MAX_AVERAGE=<v>`
+complexipy reads threshold from `pyproject.toml` `[tool.complexipy]` natively.
 
-Set the xenon values as env vars before every task invocation that includes xenon:
-`XENON_MAX_ABSOLUTE=<value> XENON_MAX_MODULES=<value> XENON_MAX_AVERAGE=<value>`
+## Loop
 
-complexipy reads its threshold from `pyproject.toml` `[tool.complexipy]` natively —
-no env var needed.
+For each iteration:
 
-## Always Full Lint
+**Fix pass:** `XENON_* task python:tdd:fix` → test → ruff:fix → complexity → cyclomatic → fmt
 
-This skill always runs full lint (ruff + complexipy + xenon). The fast/full distinction
-(`hooks_run_complexity`) applies only to hooks — never to this skill.
+**Verify pass:** `XENON_* task python:tdd` → test → ruff → complexipy → xenon (read-only)
 
-## Loop Structure
+- Green → done, report success
+- Still dirty → repeat up to `iteration_limit`
+- Limit hit → report remaining issues explicitly, do not silently fail
 
-For each iteration (starting at 1):
-
-### Fix Pass
-Run with xenon thresholds as env vars:
-`XENON_MAX_ABSOLUTE=<value> XENON_MAX_MODULES=<value> XENON_MAX_AVERAGE=<value> task python:tdd:fix`
-
-This runs: test → ruff:fix → complexity check → cyclomatic check → fmt
-
-Handle each failure type:
-- **Test failures** → fix implementation logic in source files. Never modify test files.
-- **ruff violations after auto-fix** → fix manually. ruff:fix handles most cases; remaining ones need code changes.
-- **Complexity violations (complexipy)** → propose a specific refactor strategy, wait for user confirmation, then apply.
-- **Cyclomatic violations (xenon)** → same as complexity: propose a refactor, confirm with user, then apply.
-
-### Verify Pass
-Run with the same xenon env var prefix:
-`XENON_MAX_ABSOLUTE=<value> XENON_MAX_MODULES=<value> XENON_MAX_AVERAGE=<value> task python:tdd`
-
-This runs: test → ruff → complexipy → xenon (read-only, no fixes)
-
-If fully green → done. Report success and stop.
-If still dirty → increment counter, repeat.
-
-## On Limit Hit
-
-Report clearly, do not silently fail:
-```
-Iteration limit (5) reached. Remaining issues:
-- Tests: 1 still failing — tests/test_module.py::test_edge_case
-- Ruff: 2 violations — src/module.py:45, src/utils.py:12
-- Complexity (complexipy): 1 function still above threshold — process_data (score: 18)
-- Cyclomatic (xenon): grade B exceeded in src/module.py
-
-Action required: fix these manually before proceeding.
-```
-
-## Return on Success
-
-```
-Clean after <N> iteration(s):
-- Tests fixed: <N>
-- Ruff violations fixed: <N>
-- Format issues fixed: <N>
-All checks passing ✓
-```
+Always full lint — never the fast variant regardless of `hooks_run_complexity` config.
+Never modify test files.
+Complexity/cyclomatic refactors require user confirmation before applying.
