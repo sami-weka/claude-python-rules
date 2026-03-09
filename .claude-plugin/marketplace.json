@@ -11,7 +11,7 @@
   "plugins": [
     {
       "name": "py-lint-driven",
-      "source": "./",
+      "source": "./py-lint-driven",
       "description": "Enforces ruff, complexipy, xenon, and pytest automatically on every Python file write/edit.",
       "version": "1.0.0",
       "author": {
