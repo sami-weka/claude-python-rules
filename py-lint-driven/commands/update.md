@@ -2,6 +2,9 @@
 name: update
 description: Re-sync project templates to the latest plugin version. Run after upgrading the plugin to get updated Taskfiles, CI workflow, and new config settings. Never overwrites user-owned files or existing config values.
 argument-hint: ""
+allowed-tools:
+  - Read(${CLAUDE_PLUGIN_ROOT}/templates/*)
+  - Write(.github/workflows/*)
 ---
 
 # /update Command
