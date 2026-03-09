@@ -5,7 +5,7 @@ allowed-tools:
   - Bash(ruff check*)
   - Bash(ruff format*)
   - Bash(complexipy*)
-  - Bash(XENON_MAX_ABSOLUTE=* XENON_MAX_MODULES=* XENON_MAX_AVERAGE=* xenon*)
+  - Bash(xenon*)
 ---
 
 # quality-analyzer Agent
@@ -21,22 +21,25 @@ Called by `iterate-until-clean` for the verify pass, and by `/lint-check` and
 Receives:
 - `files` — space-separated list of files to check (optional, defaults to `.`)
 - `skip_tests` — when true, omit pytest entirely (optional, defaults to false)
-- xenon env vars from the caller: `XENON_MAX_ABSOLUTE`, `XENON_MAX_MODULES`, `XENON_MAX_AVERAGE`
+- xenon thresholds from the caller: `XENON_MAX_ABSOLUTE`, `XENON_MAX_MODULES`, `XENON_MAX_AVERAGE`
 
 ## Execution: Run All Tools in Parallel
+
+Run xenon directly with flags — do NOT use `task python:cyclomatic` as env vars are not
+forwarded through task. Command: `xenon -b <XENON_MAX_ABSOLUTE> -m <XENON_MAX_MODULES> -a <XENON_MAX_AVERAGE> .`
 
 When `skip_tests` is false (default), issue all four commands simultaneously:
 
 1. `task python:test`
 2. `task python:ruff FILES=<files>`
 3. `task python:complexity FILES=<files>`
-4. `XENON_MAX_ABSOLUTE=<v> XENON_MAX_MODULES=<v> XENON_MAX_AVERAGE=<v> task python:cyclomatic`
+4. `xenon -b <XENON_MAX_ABSOLUTE> -m <XENON_MAX_MODULES> -a <XENON_MAX_AVERAGE> .`
 
 When `skip_tests` is true, issue only the three lint commands simultaneously (omit test):
 
 1. `task python:ruff FILES=<files>`
 2. `task python:complexity FILES=<files>`
-3. `XENON_MAX_ABSOLUTE=<v> XENON_MAX_MODULES=<v> XENON_MAX_AVERAGE=<v> task python:cyclomatic`
+3. `xenon -b <XENON_MAX_ABSOLUTE> -m <XENON_MAX_MODULES> -a <XENON_MAX_AVERAGE> .`
 
 Collect the stdout, stderr, and exit code from each. All four run to completion
 regardless of the others' exit codes.
