@@ -15,9 +15,11 @@ Run the unified fix/verify quality loop on existing code.
 ## Flow
 
 1. **Iterate until clean**
-   Use the `iterate-until-clean` skill on `$ARGUMENTS` (or `.` if not provided).
-   The skill runs fix pass (`task python:tdd:fix`) then verify pass (`task python:tdd`),
-   repeating up to `iteration_limit` times.
+   - If `$ARGUMENTS` is provided: use the `iterate-until-clean` skill on that path.
+   - If no argument: use the `iterate-until-clean` skill with `scope: git` — scopes
+     linting to git-changed Python files (staged, unstaged, new untracked).
+     Falls back to `.` if no git changes detected.
+   Repeats up to `iteration_limit` times.
 
 2. **Report**
    Use the `report-quality` skill to display the final quality summary.

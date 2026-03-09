@@ -15,9 +15,14 @@ Read-only audit — no files are modified.
 ## Flow
 
 1. **Run full quality check (parallel, read-only)**
-   Invoke the `quality-analyzer` agent with `$ARGUMENTS` (or `.`) and xenon env vars
-   from `py-lint-driven.local.md`. It runs tests, ruff, complexipy, and xenon in
-   parallel and returns a combined status with all findings including combined findings.
+   Invoke the `quality-analyzer` agent with xenon env vars from `py-lint-driven.local.md`.
+
+   - If `$ARGUMENTS` is provided: pass it as `files`.
+   - If no argument: use `scope: git` — pass only git-changed Python files
+     (staged, unstaged, and new untracked). Fall back to `.` if no git changes detected.
+
+   It runs tests, ruff, complexipy, and xenon in parallel and returns a combined
+   status with all findings including combined findings.
 
 2. **Also check Taskfile setup**
    If `Taskfile.yaml` or `taskfiles/Taskfile.python.yaml` do not exist, generate
