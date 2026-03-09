@@ -10,6 +10,9 @@ allowed-tools:
   - Bash(task python:complexity*)
   - Bash(XENON_MAX_ABSOLUTE=* XENON_MAX_MODULES=* XENON_MAX_AVERAGE=* task python:cyclomatic*)
   - Bash(task --taskfile taskfiles/Taskfile.python.yaml*)
+  - Bash(ruff check:*)
+  - Bash(complexipy tests:*)
+  - Bash(xenon:*)
 ---
 
 # quality-analyzer Agent
