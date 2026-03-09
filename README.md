@@ -1,4 +1,4 @@
-# claude-python-rules
+# ai-python-workflow
 
 A Claude Code plugin marketplace by [sami-weka](https://github.com/sami-weka).
 
