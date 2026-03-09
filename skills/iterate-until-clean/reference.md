@@ -76,10 +76,13 @@ Action required: fix these manually before proceeding.
 
 ## Task Reference
 
-| Pass | Command |
+| Pass | Execution |
 |---|---|
-| Fix pass | `XENON_MAX_ABSOLUTE=<v> XENON_MAX_MODULES=<v> XENON_MAX_AVERAGE=<v> task python:tdd:fix` |
-| Verify pass | `XENON_MAX_ABSOLUTE=<v> XENON_MAX_MODULES=<v> XENON_MAX_AVERAGE=<v> task python:tdd` |
+| Fix pass | `XENON_MAX_ABSOLUTE=<v> XENON_MAX_MODULES=<v> XENON_MAX_AVERAGE=<v> task python:tdd:fix` (sequential) |
+| Verify pass | `quality-analyzer` agent (parallel) |
 
-`tdd:fix` runs: test → ruff:fix → complexity → cyclomatic → fmt
-`tdd` runs: test → ruff → complexipy → xenon (read-only)
+`tdd:fix` runs sequentially: test → ruff:fix → complexity → cyclomatic → fmt
+Order matters in the fix pass: ruff:fix changes files before complexity is checked.
+
+`quality-analyzer` runs in parallel: test + ruff + complexipy + xenon simultaneously.
+All tools report even if one fails. Returns CLEAN, TEST_FAILURE, or ISSUES_FOUND.

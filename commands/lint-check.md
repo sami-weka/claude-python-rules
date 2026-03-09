@@ -14,8 +14,10 @@ Read-only audit — no files are modified.
 
 ## Flow
 
-1. **Run full TDD check (read-only)**
-   Run `task python:tdd` — this runs tests and full lint without fixing anything.
+1. **Run full quality check (parallel, read-only)**
+   Invoke the `quality-analyzer` agent with `$ARGUMENTS` (or `.`) and xenon env vars
+   from `py-lint-driven.local.md`. It runs tests, ruff, complexipy, and xenon in
+   parallel and returns a combined status with all findings including combined findings.
 
 2. **Also check Taskfile setup**
    If `Taskfile.yaml` or `taskfiles/Taskfile.python.yaml` do not exist, generate

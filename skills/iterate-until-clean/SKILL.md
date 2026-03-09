@@ -23,12 +23,18 @@ complexipy reads threshold from `pyproject.toml` `[tool.complexipy]` natively.
 
 For each iteration:
 
-**Fix pass:** `XENON_* task python:tdd:fix` → test → ruff:fix → complexity → cyclomatic → fmt
+**Fix pass** (sequential — order matters):
+`XENON_MAX_ABSOLUTE=<v> XENON_MAX_MODULES=<v> XENON_MAX_AVERAGE=<v> task python:tdd:fix`
+→ test → ruff:fix → complexity → cyclomatic → fmt
 
-**Verify pass:** `XENON_* task python:tdd` → test → ruff → complexipy → xenon (read-only)
+**Verify pass** (parallel — use `quality-analyzer` agent):
+Invoke the `quality-analyzer` agent with the current files and xenon env vars.
+It runs test, ruff, complexipy, and xenon simultaneously and returns a combined
+status: CLEAN, TEST_FAILURE, or ISSUES_FOUND.
 
-- Green → done, report success
-- Still dirty → repeat up to `iteration_limit`
+- CLEAN → done, report success
+- TEST_FAILURE with COLLECTION ERROR → stop, surface to user, do not iterate
+- TEST_FAILURE or ISSUES_FOUND → fix and repeat up to `iteration_limit`
 - Limit hit → report remaining issues explicitly, do not silently fail
 
 Always full lint — never the fast variant regardless of `hooks_run_complexity` config.
