@@ -130,6 +130,24 @@ tasks:
       - task: fmt
       - echo "--> TDD cycle complete with fixes applied"
 
+  tdd:fix:git:
+    desc: "TDD fix cycle scoped to git-changed Python files (staged, unstaged, new untracked)"
+    vars:
+      CHANGED:
+        sh: "{ git diff --name-only --diff-filter=ACMRT HEAD -- '*.py' 2>/dev/null; git ls-files --others --exclude-standard -- '*.py' 2>/dev/null; } | tr '\n' ' '"
+    status:
+      - '[ -z "{{.CHANGED}}" ]'
+    cmds:
+      - task: test
+      - task: ruff:fix
+        vars: {FILES: "{{.CHANGED}}"}
+      - task: complexity
+        vars: {FILES: "{{.CHANGED}}"}
+      - task: cyclomatic
+      - task: fmt
+        vars: {FILES: "{{.CHANGED}}"}
+      - echo "--> TDD fix cycle complete (changed files: {{.CHANGED}})"
+
   ci:
     desc: "CI: run checks on changed Python files only. Skips cleanly if none changed."
     vars:

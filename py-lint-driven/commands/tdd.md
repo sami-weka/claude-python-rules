@@ -30,9 +30,10 @@ Example: `/tdd a function that validates email addresses`
    Do not over-engineer — write only what the tests require (YAGNI).
 
 4. **Iterate until clean**
-   Use the `iterate-until-clean` skill.
-   It runs fix pass (`task python:tdd:fix`) then verify pass (`task python:tdd`),
-   repeating up to `iteration_limit` times until everything is green.
+   Use the `iterate-until-clean` skill with `scope: git`.
+   Linting runs only on git-changed Python files (staged, unstaged, and new untracked).
+   Tests always run on the full suite.
+   Repeats up to `iteration_limit` times until everything is green.
 
 5. **Report**
    Use the `report-quality` skill to display the final quality summary.

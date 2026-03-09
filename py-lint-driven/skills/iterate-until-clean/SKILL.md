@@ -19,16 +19,32 @@ Read from `py-lint-driven.local.md` (defaults if missing):
 Prefix xenon tasks with env vars: `XENON_MAX_ABSOLUTE=<v> XENON_MAX_MODULES=<v> XENON_MAX_AVERAGE=<v>`
 complexipy reads threshold from `pyproject.toml` `[tool.complexipy]` natively.
 
+## Scope (optional)
+
+When called with `scope: git`, restrict linting to git-changed files only.
+Compute changed files once before the loop:
+```
+{ git diff --name-only --diff-filter=ACMRT HEAD -- '*.py' 2>/dev/null; git ls-files --others --exclude-standard -- '*.py' 2>/dev/null; } | tr '\n' ' '
+```
+If the result is empty, fall back to `.` (no git changes detected).
+Tests always run on the full suite regardless of scope.
+
 ## Loop
 
 For each iteration:
 
 **Fix pass** (sequential — order matters):
-`XENON_MAX_ABSOLUTE=<v> XENON_MAX_MODULES=<v> XENON_MAX_AVERAGE=<v> task python:tdd:fix`
-→ test → ruff:fix → complexity → cyclomatic → fmt
+
+- Default: `XENON_MAX_ABSOLUTE=<v> XENON_MAX_MODULES=<v> XENON_MAX_AVERAGE=<v> task python:tdd:fix`
+- With `scope: git`: `XENON_MAX_ABSOLUTE=<v> XENON_MAX_MODULES=<v> XENON_MAX_AVERAGE=<v> task python:tdd:fix:git`
+
+→ test → ruff:fix → complexity → cyclomatic → fmt (scoped to changed files when scope: git)
 
 **Verify pass** (parallel — use `quality-analyzer` agent):
-Invoke the `quality-analyzer` agent with the current files and xenon env vars.
+Invoke the `quality-analyzer` agent with xenon env vars and:
+- Default: `files: .`
+- With `scope: git`: `files: <changed files computed above>`
+
 It runs test, ruff, complexipy, and xenon simultaneously and returns a combined
 status: CLEAN, TEST_FAILURE, or ISSUES_FOUND.
 
