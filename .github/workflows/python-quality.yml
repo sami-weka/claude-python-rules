@@ -95,14 +95,20 @@ EOF
           echo "files=$FILES" >> $GITHUB_OUTPUT
 
       - name: ruff
+        id: ruff
         if: steps.changed.outputs.files != ''
+        continue-on-error: true
         run: task python:ruff FILES="${{ steps.changed.outputs.files }}"
 
       - name: complexipy
+        id: complexipy
         if: steps.changed.outputs.files != ''
+        continue-on-error: true
         run: task python:complexity FILES="${{ steps.changed.outputs.files }}"
 
       - name: xenon
+        id: xenon
+        continue-on-error: true
         run: |
           XENON_MAX_ABSOLUTE=${{ vars.XENON_MAX_ABSOLUTE || 'B' }} \
           XENON_MAX_MODULES=${{ vars.XENON_MAX_MODULES || 'A' }} \
@@ -110,4 +116,22 @@ EOF
           task python:cyclomatic
 
       - name: pytest
+        id: pytest
+        continue-on-error: true
         run: task python:test
+
+      - name: results
+        if: always()
+        run: |
+          echo "ruff:       ${{ steps.ruff.outcome }}"
+          echo "complexipy: ${{ steps.complexipy.outcome }}"
+          echo "xenon:      ${{ steps.xenon.outcome }}"
+          echo "pytest:     ${{ steps.pytest.outcome }}"
+          if [[ "${{ steps.ruff.outcome }}"       != "success" && "${{ steps.ruff.outcome }}"       != "skipped" ]] || \
+             [[ "${{ steps.complexipy.outcome }}"  != "success" && "${{ steps.complexipy.outcome }}"  != "skipped" ]] || \
+             [[ "${{ steps.xenon.outcome }}"      != "success" ]] || \
+             [[ "${{ steps.pytest.outcome }}"     != "success" ]]; then
+            echo "One or more checks failed."
+            exit 1
+          fi
+          echo "All checks passed."
