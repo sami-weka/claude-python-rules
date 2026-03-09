@@ -15,17 +15,23 @@ Called by `iterate-until-clean` for the verify pass, and by `/lint-check` and
 
 Receives:
 - `files` — space-separated list of files to check (optional, defaults to `.`)
+- `skip_tests` — when true, omit pytest entirely (optional, defaults to false)
 - xenon env vars from the caller: `XENON_MAX_ABSOLUTE`, `XENON_MAX_MODULES`, `XENON_MAX_AVERAGE`
 
 ## Execution: Run All Tools in Parallel
 
-Issue all four commands simultaneously — do not wait for one to finish before
-starting the next:
+When `skip_tests` is false (default), issue all four commands simultaneously:
 
 1. `task python:test`
 2. `task python:ruff FILES=<files>`
 3. `task python:complexity FILES=<files>`
 4. `XENON_MAX_ABSOLUTE=<v> XENON_MAX_MODULES=<v> XENON_MAX_AVERAGE=<v> task python:cyclomatic`
+
+When `skip_tests` is true, issue only the three lint commands simultaneously (omit test):
+
+1. `task python:ruff FILES=<files>`
+2. `task python:complexity FILES=<files>`
+3. `XENON_MAX_ABSOLUTE=<v> XENON_MAX_MODULES=<v> XENON_MAX_AVERAGE=<v> task python:cyclomatic`
 
 Collect the stdout, stderr, and exit code from each. All four run to completion
 regardless of the others' exit codes.
@@ -92,7 +98,8 @@ Combined findings:
 ## Important Rules
 
 - Never modify files — this agent is read-only
-- Always run all four tools even if one fails
-- Test collection errors (ImportError, SyntaxError in test files) must be surfaced
-  immediately and labeled COLLECTION ERROR — do not continue iterating
+- Always run all tools even if one fails
+- When `skip_tests` is false: test collection errors (ImportError, SyntaxError in test files)
+  must be surfaced immediately and labeled COLLECTION ERROR — do not continue iterating
+- When `skip_tests` is true: TEST_FAILURE status is never returned; only CLEAN or ISSUES_FOUND
 - Lint results during TEST_FAILURE are informational only

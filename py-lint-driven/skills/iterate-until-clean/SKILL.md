@@ -15,6 +15,7 @@ Read from `py-lint-driven.local.md` (defaults if missing):
 - `xenon_max_absolute` → B
 - `xenon_max_modules` → A
 - `xenon_max_average` → A
+- `tdd_enabled` → true
 
 Prefix xenon tasks with env vars: `XENON_MAX_ABSOLUTE=<v> XENON_MAX_MODULES=<v> XENON_MAX_AVERAGE=<v>`
 complexipy reads threshold from `pyproject.toml` `[tool.complexipy]` natively.
@@ -35,18 +36,25 @@ For each iteration:
 
 **Fix pass** (sequential — order matters):
 
-- Default: `XENON_MAX_ABSOLUTE=<v> XENON_MAX_MODULES=<v> XENON_MAX_AVERAGE=<v> task python:tdd:fix`
-- With `scope: git`: `XENON_MAX_ABSOLUTE=<v> XENON_MAX_MODULES=<v> XENON_MAX_AVERAGE=<v> task python:tdd:fix:git`
+Task selection based on `tdd_enabled` and `scope`:
 
-→ test → ruff:fix → complexity → cyclomatic → fmt (scoped to changed files when scope: git)
+| tdd_enabled | scope | fix task |
+|---|---|---|
+| true | default | `task python:tdd:fix` |
+| true | git | `task python:tdd:fix:git` |
+| false | default | `task python:lint:fix` |
+| false | git | `task python:lint:fix:git` |
+
+Prefix with xenon env vars: `XENON_MAX_ABSOLUTE=<v> XENON_MAX_MODULES=<v> XENON_MAX_AVERAGE=<v> <task>`
 
 **Verify pass** (parallel — use `quality-analyzer` agent):
 Invoke the `quality-analyzer` agent with xenon env vars and:
-- Default: `files: .`
-- With `scope: git`: `files: <changed files computed above>`
+- Default scope: `files: .`
+- `scope: git`: `files: <changed files computed above>`
 
-It runs test, ruff, complexipy, and xenon simultaneously and returns a combined
-status: CLEAN, TEST_FAILURE, or ISSUES_FOUND.
+When `tdd_enabled: false`, pass `skip_tests: true` to `quality-analyzer` so it skips pytest.
+
+It returns a combined status: CLEAN, TEST_FAILURE (only when tdd_enabled), or ISSUES_FOUND.
 
 - CLEAN → done, report success
 - TEST_FAILURE with COLLECTION ERROR → stop, surface to user, do not iterate

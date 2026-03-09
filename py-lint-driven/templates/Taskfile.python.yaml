@@ -94,6 +94,23 @@ tasks:
       - task: cyclomatic
       - echo "--> Ruff auto-fix applied, linters checked"
 
+  lint:fix:git:
+    desc: "Lint fix cycle scoped to git-changed Python files (staged, unstaged, new untracked)"
+    vars:
+      CHANGED:
+        sh: "{ git diff --name-only --diff-filter=ACMRT HEAD -- '*.py' 2>/dev/null; git ls-files --others --exclude-standard -- '*.py' 2>/dev/null; } | tr '\n' ' '"
+    status:
+      - '[ -z "{{.CHANGED}}" ]'
+    cmds:
+      - task: ruff:fix
+        vars: {FILES: "{{.CHANGED}}"}
+      - task: complexity
+        vars: {FILES: "{{.CHANGED}}"}
+      - task: cyclomatic
+      - task: fmt
+        vars: {FILES: "{{.CHANGED}}"}
+      - echo "--> Lint fix cycle complete (changed files: {{.CHANGED}})"
+
   check:
     desc: "Full check: lint + format check (read-only)"
     cmds:
