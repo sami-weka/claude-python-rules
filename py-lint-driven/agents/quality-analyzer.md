@@ -6,6 +6,9 @@ allowed-tools:
   - Bash(ruff format*)
   - Bash(complexipy*)
   - Bash(xenon*)
+  - Bash(task python:ruff*)
+  - Bash(task python:complexity*)
+  - Bash(XENON_MAX_ABSOLUTE=* XENON_MAX_MODULES=* XENON_MAX_AVERAGE=* task python:cyclomatic*)
 ---
 
 # quality-analyzer Agent
