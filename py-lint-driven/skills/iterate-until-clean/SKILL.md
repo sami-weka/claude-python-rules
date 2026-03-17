@@ -23,10 +23,7 @@ complexipy reads threshold from `pyproject.toml` `[tool.complexipy]` natively.
 ## Scope (optional)
 
 When called with `scope: git`, restrict linting to git-changed files only.
-Compute changed files once before the loop:
-```
-{ git diff --name-only --diff-filter=ACMRT HEAD -- '*.py' 2>/dev/null; git ls-files --others --exclude-standard -- '*.py' 2>/dev/null; } | tr '\n' ' '
-```
+Compute changed files once before the loop by running `task python:git:changed-py`.
 If the result is empty, fall back to `.` (no git changes detected).
 Tests always run on the full suite regardless of scope.
 

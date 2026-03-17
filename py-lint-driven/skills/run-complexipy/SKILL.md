@@ -1,6 +1,6 @@
 ---
 name: run-complexipy
-description: Run complexipy to measure cognitive complexity of Python functions. Use this skill whenever you've written or refactored a function and want to check its complexity, when the user mentions "too complex", "hard to read", "deeply nested", or "refactor this function", or when the iterate-until-clean loop reports complexity violations. Always use this before claiming a refactor reduced complexity — verify with the tool.
+description: "Reference skill — defines complexipy invocation, output format, and parsing conventions used by lint-iterator and quality-analyzer. Use directly when you need to measure cognitive complexity, when the user mentions 'too complex' or 'refactor this function', or before claiming a refactor reduced complexity."
 ---
 
 # run-complexipy Skill

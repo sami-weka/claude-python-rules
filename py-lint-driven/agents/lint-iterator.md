@@ -1,6 +1,10 @@
 ---
 name: lint-iterator
 description: Fixes test failures and lint violations during the iterate-until-clean loop. Tests run first — implementation is fixed before lint violations are touched. Never modifies test files. Complexity refactors require user confirmation.
+allowed-tools:
+  - Bash(task python:*)
+  - Write(src/*)
+  - Edit(src/*)
 ---
 
 # lint-iterator Agent
@@ -10,9 +14,31 @@ during one iteration of the fix/verify loop.
 
 ## Rules
 
+## When Invoked from Hooks
+
+When called from a PostToolUse hook, the caller provides:
+- `file` — the file path that was written/edited
+- `tdd_enabled` — bool (default: true)
+- `hooks_run_complexity` — bool (default: false)
+- `xenon_max_absolute`, `xenon_max_modules`, `xenon_max_average` — thresholds
+- `iteration_limit` — max fix cycles (default: 5)
+
+Select the verification task from this table:
+
+| hooks_run_complexity | tdd_enabled | task |
+|---|---|---|
+| false | true | `task python:tdd:fast` |
+| true | true | `XENON_MAX_ABSOLUTE=<v> XENON_MAX_MODULES=<v> XENON_MAX_AVERAGE=<v> task python:tdd` |
+| false | false | `task python:lint:fast` |
+| true | false | `XENON_MAX_ABSOLUTE=<v> XENON_MAX_MODULES=<v> XENON_MAX_AVERAGE=<v> task python:lint` |
+
+Run the selected task with `FILES=<file>`. If clean — done, no output. If violations — fix and re-verify up to `iteration_limit` times. Report remaining issues if limit is reached.
+
+## Rules
+
 ### Rule 1: Tests First, Always
-Run `task python:test` first. If tests fail, fix the implementation before touching
-any lint violations. Lint is irrelevant on broken code.
+Run tests first (when tdd_enabled=true). If tests fail, fix the implementation before
+touching any lint violations. Lint is irrelevant on broken code.
 
 ### Rule 2: Three Failure Types — Handle Each Differently
 

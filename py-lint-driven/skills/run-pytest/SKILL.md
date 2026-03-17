@@ -1,6 +1,6 @@
 ---
 name: run-pytest
-description: Run pytest on the tests/ directory or a specific test file. Use this skill whenever you need to run tests, verify a TDD red state, check if an implementation satisfies tests, or when the user says "run tests", "do the tests pass", "check if this works", or "verify my changes". The key distinction this skill enforces — collection errors (broken imports) must stop iteration immediately; assertion failures are expected in TDD and should be iterated on.
+description: "Reference skill — defines pytest invocation, output format, and the critical collection-error vs assertion-failure distinction used by lint-iterator and quality-analyzer. Use directly when you need to run tests, verify a TDD red state, or when the user says 'run tests', 'do the tests pass', or 'verify my changes'."
 ---
 
 # run-pytest Skill

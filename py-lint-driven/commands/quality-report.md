@@ -2,6 +2,12 @@
 name: quality-report
 description: Deep complexity analysis. Runs ruff, complexipy, and xenon (no tests). Highlights the 5 most complex functions. Saves a timestamped report.
 argument-hint: "[path — optional, defaults to current directory]"
+allowed-tools:
+  - Bash(task python:*)
+  - Bash(ruff check*)
+  - Bash(complexipy*)
+  - Bash(xenon*)
+  - Write(.claude/py-lint-driven/reports/*)
 ---
 
 # /quality-report Command

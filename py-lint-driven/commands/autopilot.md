@@ -2,6 +2,12 @@
 name: autopilot
 description: Full development lifecycle for a Python feature — from design through implementation, tests, linting, documentation, and advisory design review. Use when building something new end-to-end. Covers everything /tdd covers plus a design phase, documentation, and pre-commit review.
 argument-hint: "<description of what to build>"
+allowed-tools:
+  - Write(src/*)
+  - Write(tests/*)
+  - Edit(src/*)
+  - Edit(tests/*)
+  - Bash(task python:*)
 ---
 
 # /autopilot Command

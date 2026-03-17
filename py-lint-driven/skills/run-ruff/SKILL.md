@@ -1,6 +1,6 @@
 ---
 name: run-ruff
-description: Run ruff linter and formatter on Python files. Use this skill whenever you need to check or fix Python style violations, unused imports, formatting issues, or lint errors. Invoke it after writing or editing any Python file, before committing, or when the user asks to "lint", "check style", "fix imports", or "clean up" Python code. Always prefer this over running ruff directly — it goes through the Taskfile.
+description: "Reference skill — defines ruff invocation patterns, output format, and parsing conventions used by lint-iterator and quality-analyzer. Use directly when you need to check or fix Python style violations, unused imports, or formatting issues, or when the user asks to 'lint', 'check style', 'fix imports', or 'clean up' Python code."
 ---
 
 # run-ruff Skill

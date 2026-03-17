@@ -2,6 +2,10 @@
 name: setup
 description: Bootstrap a new project with py-lint-driven. Copies Taskfiles, GitHub Actions workflow, and config into the current project. Run once when starting a new Python project.
 argument-hint: ""
+allowed-tools:
+  - Read(${CLAUDE_PLUGIN_ROOT}/templates/*)
+  - Write(*)
+  - Bash(task python:*)
 ---
 
 # /setup Command

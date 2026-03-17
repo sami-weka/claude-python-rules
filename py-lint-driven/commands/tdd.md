@@ -2,6 +2,11 @@
 name: tdd
 description: Test-driven development entry point. Write a description of what to build — Claude writes failing tests first, then implementation, then iterates until both tests pass and linting is clean.
 argument-hint: "<description of what to build>"
+allowed-tools:
+  - Write(src/*)
+  - Write(tests/*)
+  - Edit(src/*)
+  - Bash(task python:*)
 ---
 
 # /tdd Command

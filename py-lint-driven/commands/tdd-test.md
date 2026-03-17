@@ -2,6 +2,10 @@
 name: tdd-test
 description: Generate tests for an existing source file without writing implementation. Useful for adding test coverage to legacy code. Shows failing state and stops.
 argument-hint: "<path to source file>"
+allowed-tools:
+  - Read(src/*)
+  - Write(tests/*)
+  - Bash(task python:test*)
 ---
 
 # /tdd-test Command

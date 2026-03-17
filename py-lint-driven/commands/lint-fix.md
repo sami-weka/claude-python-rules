@@ -2,6 +2,10 @@
 name: lint-fix
 description: Fix all linting and test issues in the project or a specific path. Runs the full fix/verify loop until clean or iteration limit hit.
 argument-hint: "[path — optional, defaults to current directory]"
+allowed-tools:
+  - Edit(src/*)
+  - Edit(tests/*)
+  - Bash(task python:*)
 ---
 
 # /lint-fix Command

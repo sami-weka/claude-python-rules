@@ -2,17 +2,20 @@
 name: quality-analyzer
 description: Runs all quality checks in parallel and returns a combined report. Used by iterate-until-clean for the verify pass. Runs tests, ruff, complexipy, and xenon concurrently — all tools report even if one fails. Identifies functions and files flagged by multiple tools as combined findings. Returns a structured status: CLEAN, ISSUES_FOUND, or TEST_FAILURE.
 allowed-tools:
+  # Direct tool invocations
   - Bash(ruff check*)
+  - Bash(ruff check:*)
   - Bash(ruff format*)
   - Bash(complexipy*)
+  - Bash(complexipy tests:*)
   - Bash(xenon*)
+  - Bash(xenon:*)
+  # Task-based invocations
+  - Bash(task python:test*)
   - Bash(task python:ruff*)
   - Bash(task python:complexity*)
   - Bash(XENON_MAX_ABSOLUTE=* XENON_MAX_MODULES=* XENON_MAX_AVERAGE=* task python:cyclomatic*)
   - Bash(task --taskfile taskfiles/Taskfile.python.yaml*)
-  - Bash(ruff check:*)
-  - Bash(complexipy tests:*)
-  - Bash(xenon:*)
 ---
 
 # quality-analyzer Agent

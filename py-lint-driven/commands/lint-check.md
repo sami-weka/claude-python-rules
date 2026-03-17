@@ -2,6 +2,11 @@
 name: lint-check
 description: Read-only quality audit. Runs tests and full linting with no fixes applied. Safe to run before a pull request. Displays a quality report.
 argument-hint: "[path — optional, defaults to current directory]"
+allowed-tools:
+  - Bash(task python:*)
+  - Bash(ruff check*)
+  - Bash(complexipy*)
+  - Bash(xenon*)
 ---
 
 # /lint-check Command
