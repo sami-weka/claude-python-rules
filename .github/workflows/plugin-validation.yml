@@ -1,0 +1,58 @@
+name: Plugin Template Validation
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "py-lint-driven/templates/**"
+      - ".github/workflows/plugin-validation.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "py-lint-driven/templates/**"
+
+jobs:
+  validate:
+    name: Validate Templates
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - uses: arduino/setup-task@v2
+
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-validate-${{ hashFiles('test-project/pyproject.toml') }}
+          restore-keys: ${{ runner.os }}-pip-validate-
+
+      - name: Install tools
+        run: pip install ruff complexipy xenon pytest pytest-cov pyyaml
+
+      - name: Validate template YAML
+        run: |
+          python3 -c "import yaml; yaml.safe_load(open('py-lint-driven/templates/Taskfile.yaml').read())"
+          python3 -c "import yaml; yaml.safe_load(open('py-lint-driven/templates/Taskfile.python.yaml').read())"
+          python3 -c "import yaml; yaml.safe_load(open('py-lint-driven/templates/.github/workflows/python-quality.yml').read())"
+          echo "YAML validation passed"
+
+      - name: Sync templates to test-project
+        run: |
+          cp py-lint-driven/templates/Taskfile.yaml test-project/Taskfile.yaml
+          cp py-lint-driven/templates/Taskfile.python.yaml test-project/taskfiles/Taskfile.python.yaml
+          cp py-lint-driven/templates/pyproject.toml test-project/pyproject.toml
+          cp py-lint-driven/templates/py-lint-driven.local.md test-project/py-lint-driven.local.md
+          mkdir -p test-project/.github/workflows
+          cp py-lint-driven/templates/.github/workflows/python-quality.yml \
+             test-project/.github/workflows/python-quality.yml
+
+      - name: Run tests in test-project
+        run: cd test-project && task python:test
+
+      - name: Run lint in test-project
+        run: cd test-project && task python:lint

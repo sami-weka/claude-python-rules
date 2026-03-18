@@ -1,0 +1,114 @@
+version: '3'
+
+# Root Taskfile for the ai-python-workflow plugin marketplace.
+# Usage:
+#   task validate          — validate plugin templates against test-project
+#   task bump:patch        — bump patch version (bug fixes)
+#   task bump:minor        — bump minor version (new features)
+#   task bump:major        — bump major version (breaking changes)
+#   task install:hooks     — install pre-push hook into .git/hooks/
+
+tasks:
+
+  # ---------------------------------------------------------------------------
+  # Validation
+  # ---------------------------------------------------------------------------
+
+  validate:
+    desc: "Validate plugin templates: YAML parse + sync to test-project + run tests and lint"
+    cmds:
+      - task: validate:yaml
+      - task: validate:sync
+      - task: validate:test
+
+  validate:yaml:
+    desc: "Check that Taskfile templates parse cleanly (these are copied verbatim to user projects)"
+    cmds:
+      - python3 -c "import yaml; yaml.safe_load(open('py-lint-driven/templates/Taskfile.yaml').read()); print('OK  Taskfile.yaml')"
+      - python3 -c "import yaml; yaml.safe_load(open('py-lint-driven/templates/Taskfile.python.yaml').read()); print('OK  Taskfile.python.yaml')"
+      - echo "--> YAML validation passed"
+
+  validate:sync:
+    desc: "Copy templates to test-project (does not touch src/, tests/, conftest.py)"
+    cmds:
+      - cp py-lint-driven/templates/Taskfile.yaml test-project/Taskfile.yaml
+      - cp py-lint-driven/templates/Taskfile.python.yaml test-project/taskfiles/Taskfile.python.yaml
+      - cp py-lint-driven/templates/pyproject.toml test-project/pyproject.toml
+      - cp py-lint-driven/templates/py-lint-driven.local.md test-project/py-lint-driven.local.md
+      - mkdir -p test-project/.github/workflows
+      - cp py-lint-driven/templates/.github/workflows/python-quality.yml test-project/.github/workflows/python-quality.yml
+      - echo "--> Sync complete"
+
+  validate:test:
+    desc: "Run tests and lint in test-project"
+    dir: test-project
+    cmds:
+      - task python:test
+      - task python:lint
+      - echo "--> Validation passed"
+
+  # ---------------------------------------------------------------------------
+  # Version bumping
+  # ---------------------------------------------------------------------------
+
+  bump:patch:
+    desc: "Bump patch version (bug fixes, allowed-tools additions, description tweaks)"
+    cmds:
+      - task: _bump
+        vars: { BUMP_TYPE: patch }
+
+  bump:minor:
+    desc: "Bump minor version (new commands, skills, tasks, behavioral changes)"
+    cmds:
+      - task: _bump
+        vars: { BUMP_TYPE: minor }
+
+  bump:major:
+    desc: "Bump major version (breaking changes: removed commands, changed config schema)"
+    cmds:
+      - task: _bump
+        vars: { BUMP_TYPE: major }
+
+  _bump:
+    internal: true
+    vars:
+      CURRENT:
+        sh: python3 -c "import json; print(json.load(open('py-lint-driven/plugin.json'))['version'])"
+      NEW_VERSION:
+        sh: python3 scripts/bump_version.py {{.CURRENT}} {{.BUMP_TYPE}}
+    cmds:
+      - echo "Bumping {{.BUMP_TYPE}}{{":"}} {{.CURRENT}} → {{.NEW_VERSION}}"
+      - python3 scripts/apply_version.py {{.NEW_VERSION}}
+      - task: _bump:changelog
+        vars: { VERSION: "{{.NEW_VERSION}}" }
+      - echo "--> Done. Edit CHANGELOG.md to fill in the new [{{.NEW_VERSION}}] section, then commit."
+
+  _bump:changelog:
+    internal: true
+    vars:
+      TODAY:
+        sh: date +%Y-%m-%d
+    cmds:
+      - |
+        TEMP=$(mktemp)
+        printf '## [{{.VERSION}}] - {{.TODAY}}\n\n### Added\n- \n\n### Changed\n- \n\n### Fixed\n- \n\n' > "$TEMP"
+        FIRST_VER=$(grep -n "^## \[" py-lint-driven/CHANGELOG.md | head -1 | cut -d: -f1)
+        if [ -n "$FIRST_VER" ]; then
+            head -n $((FIRST_VER - 1)) py-lint-driven/CHANGELOG.md >> "$TEMP"
+            tail -n +"$FIRST_VER" py-lint-driven/CHANGELOG.md >> "$TEMP"
+        else
+            cat py-lint-driven/CHANGELOG.md >> "$TEMP"
+        fi
+        mv "$TEMP" py-lint-driven/CHANGELOG.md
+        echo "--> CHANGELOG.md updated with [{{.VERSION}}] section"
+
+  # ---------------------------------------------------------------------------
+  # Setup
+  # ---------------------------------------------------------------------------
+
+  install:hooks:
+    desc: "Install the pre-push hook into .git/hooks/"
+    cmds:
+      - cp scripts/pre-push-hook.sh .git/hooks/pre-push
+      - chmod +x .git/hooks/pre-push
+      - echo "--> Pre-push hook installed"
