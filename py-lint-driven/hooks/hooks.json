@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "prompt",
-            "prompt": "File written: {{tool.input.file_path}}\nStop if not a .py file.\nRead py-lint-driven.local.md (defaults: hooks_enabled=true, tdd_enabled=true, hooks_run_complexity=false, iteration_limit=5, xenon_max_absolute=B, xenon_max_modules=A, xenon_max_average=A). Stop if hooks_enabled=false.\n\nIf TEST FILE (path contains /tests/ or starts with tests/):\n1. Run: task python:test:file FILE={{tool.input.file_path}}\n   - If FAIL: red state confirmed (expected for new tests)\n   - If PASS: warn 'Tests pass before implementation — verify they test correct behavior'\n2. Run: task python:ruff FILES={{tool.input.file_path}} — fix any violations.\n\nIf SOURCE FILE: invoke the lint-iterator agent with this file path, config values (tdd_enabled, hooks_run_complexity, xenon thresholds), and iteration_limit."
+            "prompt": "File written: {{tool.input.file_path}}\nStop if not a .py file.\nRead py-lint-driven.local.md (defaults: hooks_enabled=true, tdd_enabled=true, hooks_run_complexity=false, iteration_limit=5, xenon_max_absolute=B, xenon_max_modules=A, xenon_max_average=A). Stop if hooks_enabled=false.\n\nIf TEST FILE (path contains /tests/ or starts with tests/):\n1. Run: task python:test:file FILE={{tool.input.file_path}}\n   - If FAIL: red state confirmed (expected for new tests)\n   - If PASS: warn 'Tests pass before implementation — verify they test correct behavior'\n2. Run: task python:ruff FILES={{tool.input.file_path}} — fix any violations.\n\nIf SOURCE FILE: invoke the lint-iterator agent passing: file={{tool.input.file_path}}, tdd_enabled=<value>, hooks_run_complexity=<value>, xenon_max_absolute=<value>, xenon_max_modules=<value>, xenon_max_average=<value>, iteration_limit=<value>."
           }
         ]
       },
@@ -15,7 +15,7 @@
         "hooks": [
           {
             "type": "prompt",
-            "prompt": "File edited: {{tool.input.file_path}}\nStop if not a .py file.\nRead py-lint-driven.local.md (defaults: hooks_enabled=true, tdd_enabled=true, hooks_run_complexity=false, iteration_limit=5, xenon_max_absolute=B, xenon_max_modules=A, xenon_max_average=A). Stop if hooks_enabled=false.\n\nIf TEST FILE (path contains /tests/ or starts with tests/):\n1. Run: task python:test:file FILE={{tool.input.file_path}}\n2. Run: task python:ruff FILES={{tool.input.file_path}} — fix any violations.\n\nIf SOURCE FILE: invoke the lint-iterator agent with this file path, config values (tdd_enabled, hooks_run_complexity, xenon thresholds), and iteration_limit."
+            "prompt": "File edited: {{tool.input.file_path}}\nStop if not a .py file.\nRead py-lint-driven.local.md (defaults: hooks_enabled=true, tdd_enabled=true, hooks_run_complexity=false, iteration_limit=5, xenon_max_absolute=B, xenon_max_modules=A, xenon_max_average=A). Stop if hooks_enabled=false.\n\nIf TEST FILE (path contains /tests/ or starts with tests/):\n1. Run: task python:test:file FILE={{tool.input.file_path}}\n2. Run: task python:ruff FILES={{tool.input.file_path}} — fix any violations.\n\nIf SOURCE FILE: invoke the lint-iterator agent passing: file={{tool.input.file_path}}, tdd_enabled=<value>, hooks_run_complexity=<value>, xenon_max_absolute=<value>, xenon_max_modules=<value>, xenon_max_average=<value>, iteration_limit=<value>."
           }
         ]
       }

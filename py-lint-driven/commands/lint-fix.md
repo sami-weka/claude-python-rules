@@ -4,7 +4,6 @@ description: Fix all linting and test issues in the project or a specific path. 
 argument-hint: "[path — optional, defaults to current directory]"
 allowed-tools:
   - Edit(src/*)
-  - Edit(tests/*)
   - Bash(task python:*)
 ---
 

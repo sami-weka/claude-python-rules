@@ -95,7 +95,8 @@ tasks:
       - echo "--> Ruff auto-fix applied, linters checked"
 
   git:changed-py:
-    desc: "Print space-separated git-changed Python files (staged, unstaged, new untracked). Canonical definition — tdd:fix:git and lint:fix:git use the same command."
+    desc: "Print space-separated git-changed Python files (staged, unstaged, new untracked). Canonical definition consumed by tdd:fix:git and lint:fix:git."
+    silent: true
     cmds:
       - "{ git diff --name-only --diff-filter=ACMRT HEAD -- '*.py' 2>/dev/null; git ls-files --others --exclude-standard -- '*.py' 2>/dev/null; } | tr '\n' ' '"
 
@@ -103,7 +104,7 @@ tasks:
     desc: "Lint fix cycle scoped to git-changed Python files. See git:changed-py for file selection logic."
     vars:
       CHANGED:
-        sh: "{ git diff --name-only --diff-filter=ACMRT HEAD -- '*.py' 2>/dev/null; git ls-files --others --exclude-standard -- '*.py' 2>/dev/null; } | tr '\n' ' '"
+        sh: "task python:git:changed-py"
     status:
       - '[ -z "{{.CHANGED}}" ]'
     cmds:
@@ -156,7 +157,7 @@ tasks:
     desc: "TDD fix cycle scoped to git-changed Python files. See git:changed-py for file selection logic."
     vars:
       CHANGED:
-        sh: "{ git diff --name-only --diff-filter=ACMRT HEAD -- '*.py' 2>/dev/null; git ls-files --others --exclude-standard -- '*.py' 2>/dev/null; } | tr '\n' ' '"
+        sh: "task python:git:changed-py"
     status:
       - '[ -z "{{.CHANGED}}" ]'
     cmds:

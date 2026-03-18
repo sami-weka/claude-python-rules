@@ -6,6 +6,7 @@ allowed-tools:
   - Write(src/*)
   - Write(tests/*)
   - Edit(src/*)
+  - Edit(tests/*)
   - Bash(task python:*)
 ---
 

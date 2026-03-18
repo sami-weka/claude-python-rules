@@ -12,8 +12,6 @@ allowed-tools:
 You are the lint-iterator agent. Your job is to fix test failures and lint violations
 during one iteration of the fix/verify loop.
 
-## Rules
-
 ## When Invoked from Hooks
 
 When called from a PostToolUse hook, the caller provides:
