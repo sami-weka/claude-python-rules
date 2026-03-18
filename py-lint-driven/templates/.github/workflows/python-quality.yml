@@ -51,7 +51,6 @@ jobs:
         run: |
           complexipy ${{ steps.changed.outputs.files }} > /tmp/cx.txt || true
           python3 - << 'EOF'
-import re
 current_file = None
 with open("/tmp/cx.txt") as f:
     for line in f:
