@@ -109,13 +109,16 @@ tasks:
       - '[ -z "{{.CHANGED}}" ]'
     cmds:
       - task: ruff:fix
-        vars: {FILES: "{{.CHANGED}}"}
+        vars:
+          FILES: "{{.CHANGED}}"
       - task: complexity
-        vars: {FILES: "{{.CHANGED}}"}
+        vars:
+          FILES: "{{.CHANGED}}"
       - task: cyclomatic
       - task: fmt
-        vars: {FILES: "{{.CHANGED}}"}
-      - echo "--> Lint fix cycle complete (changed files: {{.CHANGED}})"
+        vars:
+          FILES: "{{.CHANGED}}"
+      - 'echo "--> Lint fix cycle complete (changed files: {{.CHANGED}})"'
 
   check:
     desc: "Full check: lint + format check (read-only)"
@@ -163,13 +166,16 @@ tasks:
     cmds:
       - task: test
       - task: ruff:fix
-        vars: {FILES: "{{.CHANGED}}"}
+        vars:
+          FILES: "{{.CHANGED}}"
       - task: complexity
-        vars: {FILES: "{{.CHANGED}}"}
+        vars:
+          FILES: "{{.CHANGED}}"
       - task: cyclomatic
       - task: fmt
-        vars: {FILES: "{{.CHANGED}}"}
-      - echo "--> TDD fix cycle complete (changed files: {{.CHANGED}})"
+        vars:
+          FILES: "{{.CHANGED}}"
+      - 'echo "--> TDD fix cycle complete (changed files: {{.CHANGED}})"'
 
   ci:
     desc: "CI: run checks on changed Python files only. Skips cleanly if none changed."

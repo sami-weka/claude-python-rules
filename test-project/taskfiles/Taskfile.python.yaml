@@ -94,6 +94,32 @@ tasks:
       - task: cyclomatic
       - echo "--> Ruff auto-fix applied, linters checked"
 
+  git:changed-py:
+    desc: "Print space-separated git-changed Python files (staged, unstaged, new untracked). Canonical definition consumed by tdd:fix:git and lint:fix:git."
+    silent: true
+    cmds:
+      - "{ git diff --name-only --diff-filter=ACMRT HEAD -- '*.py' 2>/dev/null; git ls-files --others --exclude-standard -- '*.py' 2>/dev/null; } | tr '\n' ' '"
+
+  lint:fix:git:
+    desc: "Lint fix cycle scoped to git-changed Python files. See git:changed-py for file selection logic."
+    vars:
+      CHANGED:
+        sh: "task python:git:changed-py"
+    status:
+      - '[ -z "{{.CHANGED}}" ]'
+    cmds:
+      - task: ruff:fix
+        vars:
+          FILES: "{{.CHANGED}}"
+      - task: complexity
+        vars:
+          FILES: "{{.CHANGED}}"
+      - task: cyclomatic
+      - task: fmt
+        vars:
+          FILES: "{{.CHANGED}}"
+      - 'echo "--> Lint fix cycle complete (changed files: {{.CHANGED}})"'
+
   check:
     desc: "Full check: lint + format check (read-only)"
     cmds:
@@ -129,6 +155,27 @@ tasks:
       - task: lint:fix
       - task: fmt
       - echo "--> TDD cycle complete with fixes applied"
+
+  tdd:fix:git:
+    desc: "TDD fix cycle scoped to git-changed Python files. See git:changed-py for file selection logic."
+    vars:
+      CHANGED:
+        sh: "task python:git:changed-py"
+    status:
+      - '[ -z "{{.CHANGED}}" ]'
+    cmds:
+      - task: test
+      - task: ruff:fix
+        vars:
+          FILES: "{{.CHANGED}}"
+      - task: complexity
+        vars:
+          FILES: "{{.CHANGED}}"
+      - task: cyclomatic
+      - task: fmt
+        vars:
+          FILES: "{{.CHANGED}}"
+      - 'echo "--> TDD fix cycle complete (changed files: {{.CHANGED}})"'
 
   ci:
     desc: "CI: run checks on changed Python files only. Skips cleanly if none changed."
